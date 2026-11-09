@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>My IoT Page</title>
+<style>
+  /* ---------- YOU CAN CHANGE ALL OF THIS ---------- */
+  body { font-family: Arial, sans-serif; max-width: 640px; margin: 24px auto; padding: 0 16px; background: #f5f5f5; color: #222; }
+  h1   { margin-bottom: 4px; }
+  .card { background: #fff; border-radius: 12px; padding: 20px; margin: 16px 0; box-shadow: 0 2px 6px rgba(0,0,0,.1); }
+  .status { font-size: 1.6rem; font-weight: bold; margin: 8px 0; }
+  .small { color: #666; font-size: .9rem; }
+  button { font-size: 1rem; padding: 10px 18px; margin: 4px; border: 0; border-radius: 8px; cursor: pointer; color: #fff; }
+  .red   { background: #d33; }
+  .green { background: #2a2; }
+  .blue  { background: #36c; }
+  .off   { background: #555; }
+  .flash { animation: flash .6s; }
+  @keyframes flash { from { background: #ffe66d; } to { background: #fff; } }
+  #errors { color: #b00; white-space: pre-wrap; }
+</style>
+</head>
+<body>
+
+<h1>My IoT Page</h1>
+<p class="small">Adafruit IO user: <span id="whoami">?</span> &nbsp;|&nbsp; <a href="#" id="changeKey">change key</a></p>
+
+<!-- ================= PROJECT A : Arduino -> Website ================= -->
+<div class="card" id="cardA">
+  <h2>Doorbell</h2>
+  <div class="status" id="doorbellStatus">Waiting for the Arduino...</div>
+  <div class="small" id="doorbellTime"></div>
+  <div class="small">Presses since this page opened: <span id="doorbellCount">0</span></div>
+</div>
+
+<!-- ================= PROJECT B : Website -> Arduino ================= -->
+<div class="card">
+  <h2>Remote Lamp</h2>
+  <button class="red"   onclick="sendLamp('red')">Red</button>
+  <button class="off"   onclick="sendLamp('off')">Off</button>
+  <!-- YOUR TURN: add Green, Blue, and a Buzzer button. -->
+  <div class="small" id="lampStatus"></div>
+</div>
+
+<div class="card">
+  <h3>Problems?</h3>
+  <div id="errors" class="small">None yet.</div>
+</div>
+
+<script>
+/* =====================================================================
+   SETTINGS - change these two lines
+   ===================================================================== */
+const IO_USERNAME   = "eagle_vivien";   // <-- your Adafruit IO username
+const DOORBELL_FEED = "doorbell";                     // Project A feed (Arduino -> web)
+const LAMP_FEED     = "lamp";                         // Project B feed (web -> Arduino)
+const POLL_MS       = 2000;                           // how often to check the doorbell feed (ms). Keep >= 2000.
+
+/* =====================================================================
+   YOUR KEY IS NOT IN THIS FILE ON PURPOSE.
+   This page is public on GitHub. Anyone can read this code. So the page
+   asks you for your key once and remembers it in THIS browser only.
+   ===================================================================== */
+function getKey() {
+  let key = null;
+  try { key = localStorage.getItem("aio_key"); } catch (e) {}
+  if (!key) {
+    key = prompt("Paste your Adafruit IO key (starts with aio_). It stays in this browser only.");
+    if (key) { try { localStorage.setItem("aio_key", key.trim()); } catch (e) {} }
+  }
+  return key ? key.trim() : "";
+}
+document.getElementById("changeKey").onclick = (e) => {
+  e.preventDefault();
+  try { localStorage.removeItem("aio_key"); } catch (e2) {}
+  location.reload();
+};
+
+const IO_KEY = getKey();
+document.getElementById("whoami").textContent = IO_USERNAME;
+
+const BASE = `https://io.adafruit.com/api/v2/${IO_USERNAME}/feeds/`;
+
+function showError(msg) {
+  document.getElementById("errors").textContent = msg;
+  console.error(msg);
+}
+
+/* =====================================================================
+   PROJECT A - read the doorbell feed every POLL_MS milliseconds
+   ===================================================================== */
+let lastSeenId = null;   // id of the newest data point we have already shown
+let count = 0;
+
+async function checkDoorbell() {
+  try {
+    const res = await fetch(BASE + DOORBELL_FEED + "/data/last", {
+      headers: { "X-AIO-Key": IO_KEY }
+    });
+    if (res.status === 404) { showError("Feed '" + DOORBELL_FEED + "' not found. Did you create it on io.adafruit.com?"); return; }
+    if (res.status === 401) { showError("401: wrong username or key. Click 'change key'."); return; }
+    if (!res.ok) { showError("Adafruit IO replied " + res.status); return; }
+
+    const data = await res.json();       // { id, value, created_at, ... }
+
+    if (data.id !== lastSeenId) {        // something NEW happened on the Arduino
+      const isFirstLoad = (lastSeenId === null);
+      lastSeenId = data.id;
+      if (!isFirstLoad) count++;
+      showDoorbell(data.value, data.created_at, !isFirstLoad);
+    }
+    document.getElementById("errors").textContent = "None. Connected.";
+  } catch (err) {
+    showError("Could not reach Adafruit IO: " + err.message);
+  }
+}
+
+function showDoorbell(value, createdAt, flash) {
+  // ===== YOUR TURN =====
+  // Right now this just prints the raw value ("A"). Turn it into a real message:
+  //   "A" -> "Someone is at the door!"   "B" -> ...   "C" -> ...
+  // =====================
+  let message = "Button " + value + " was pressed";
+
+  document.getElementById("doorbellStatus").textContent = message;
+  document.getElementById("doorbellTime").textContent = "at " + new Date(createdAt).toLocaleTimeString();
+  document.getElementById("doorbellCount").textContent = count;
+
+  if (flash) {
+    const card = document.getElementById("cardA");
+    card.classList.remove("flash");
+    void card.offsetWidth;               // restart the animation
+    card.classList.add("flash");
+  }
+}
+
+/* =====================================================================
+   PROJECT B - write to the lamp feed when a button is clicked
+   ===================================================================== */
+async function sendLamp(value) {
+  const status = document.getElementById("lampStatus");
+  status.textContent = "Sending '" + value + "'...";
+  try {
+    const res = await fetch(BASE + LAMP_FEED + "/data", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "X-AIO-Key": IO_KEY },
+      body: JSON.stringify({ value: value })
+    });
+    if (res.status === 429) { status.textContent = "Slow down! Rate limit hit (30 per minute)."; return; }
+    if (!res.ok) { status.textContent = "Adafruit IO replied " + res.status; return; }
+    status.textContent = "Sent '" + value + "' at " + new Date().toLocaleTimeString();
+  } catch (err) {
+    status.textContent = "Could not send: " + err.message;
+  }
+}
+
+/* ---------- start ---------- */
+checkDoorbell();
+setInterval(checkDoorbell, POLL_MS);
+</script>
+</body>
+</html>
