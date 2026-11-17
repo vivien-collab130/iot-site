@@ -15,7 +15,7 @@
   .red   { background: #d33; }
   .green { background: #2a2; }
   .blue  { background: #36c; }
-  .off   { background: #555; }  
+  .off   { background: #555; }
   .beep  { background: #e90; }
   .music { background: linear-gradient(90deg, #d33, #2a2); }
   .flash { animation: flash .6s; }
@@ -43,8 +43,8 @@
   <button class="green" onclick="sendLamp('green')">Green</button>
   <button class="blue"  onclick="sendLamp('blue')">Blue</button>
   <button class="off"   onclick="sendLamp('off')">Off</button>
-  <button class="beep"   onclick="sendLamp('beep')">beep</button>
-    <button class="music" onclick="sendLamp('music')">🎄 Music</button>
+  <button class="beep"  onclick="sendLamp('beep')">Beep</button>
+  <button class="music" onclick="sendLamp('music')">🎄 Music</button>
   <div class="small" id="lampStatus"></div>
 </div>
 
@@ -58,9 +58,9 @@
    SETTINGS - change these two lines
    ===================================================================== */
 const IO_USERNAME   = "eagle_vivien";   // <-- your Adafruit IO username
-const DOORBELL_FEED = "doorbell";                     // Project A feed (Arduino -> web)
-const LAMP_FEED     = "lamp";                         // Project B feed (web -> Arduino)
-const POLL_MS       = 2000;                           // how often to check the doorbell feed (ms). Keep >= 2000.
+const DOORBELL_FEED = "doorbell";       // Project A feed (Arduino -> web)
+const LAMP_FEED     = "lamp";           // Project B feed (web -> Arduino)
+const POLL_MS       = 2000;             // how often to check the doorbell feed (ms). Keep >= 2000.
 
 /* =====================================================================
    YOUR KEY IS NOT IN THIS FILE ON PURPOSE.
@@ -122,11 +122,17 @@ async function checkDoorbell() {
 }
 
 function showDoorbell(value, createdAt, flash) {
-  // ===== YOUR TURN =====
-  // Right now this just prints the raw value ("A"). Turn it into a real message:
-  //   "A" -> "Someone is at the door!"   "B" -> ...   "C" -> ...
-  // =====================
-  let message = "Button " + value + " was pressed";
+  // Turn the button letter into a real sentence.
+  let message;
+  if (value === "A") {
+    message = "Someone is at the door!";   // change this later if you want
+  } else if (value === "B") {
+    message = "Go away!";
+  } else if (value === "C") {
+    message = "The doorbell rang!";
+  } else {
+    message = "Button " + value + " was pressed";
+  }
 
   document.getElementById("doorbellStatus").textContent = message;
   document.getElementById("doorbellTime").textContent = "at " + new Date(createdAt).toLocaleTimeString();
