@@ -15,7 +15,9 @@
   .red   { background: #d33; }
   .green { background: #2a2; }
   .blue  { background: #36c; }
-  .off   { background: #555; }
+  .off   { background: #555; }  
+  .beep  { background: #e90; }
+  .music { background: linear-gradient(90deg, #d33, #2a2); }
   .flash { animation: flash .6s; }
   @keyframes flash { from { background: #ffe66d; } to { background: #fff; } }
   #errors { color: #b00; white-space: pre-wrap; }
@@ -41,7 +43,8 @@
   <button class="green" onclick="sendLamp('green')">Green</button>
   <button class="blue"  onclick="sendLamp('blue')">Blue</button>
   <button class="off"   onclick="sendLamp('off')">Off</button>
-  <button class="off"   onclick="sendLamp('beep')">Beep</button>
+  <button class="beep"   onclick="sendLamp('beep')">beep</button>
+    <button class="music" onclick="sendLamp('music')">🎄 Music</button>
   <div class="small" id="lampStatus"></div>
 </div>
 
