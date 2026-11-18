@@ -7,6 +7,45 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
 <style>
+    <!-- What I learned -->
+  <div class="card">
+    <h2>// WHAT I LEARNED BUILDING THIS</h2>
+    <p class="what">Everything I learned in this workshop, and where it shows up in this game.</p>
+    <div class="learned">
+      <div class="skill">
+        <div class="name">📬 Feeds</div>
+        <div class="used">A feed is a mailbox in the cloud. The <b>game</b> feed carries every round and score.</div>
+      </div>
+      <div class="skill">
+        <div class="name">🛎️ Arduino → Website</div>
+        <div class="used">My Doorbell project sent button presses to a website. Here, the Arduino sends scores.</div>
+      </div>
+      <div class="skill">
+        <div class="name">💡 Website → Arduino</div>
+        <div class="used">My Remote Lamp project let a phone change real lights and play music.</div>
+      </div>
+      <div class="skill">
+        <div class="name">🔁 Polling vs. Subscribing</div>
+        <div class="used">This screen <b>polls</b>: it checks every 2 seconds. My Lamp <b>subscribed</b>: messages were pushed to it.</div>
+      </div>
+      <div class="skill">
+        <div class="name">🚦 Rate Limits</div>
+        <div class="used">Adafruit IO allows 30 messages a minute, so the Arduino waits 2 seconds between messages.</div>
+      </div>
+      <div class="skill">
+        <div class="name">🔐 Keeping Secrets Safe</div>
+        <div class="used">My key is never in the code or on GitHub. It stays in a secrets file on my computer.</div>
+      </div>
+      <div class="skill">
+        <div class="name">🌐 Publishing a Website</div>
+        <div class="used">This page is live on the internet with GitHub Pages, so anyone with the link can see it.</div>
+      </div>
+      <div class="skill">
+        <div class="name">🐞 Debugging</div>
+        <div class="used">If something breaks, I check the feed: if the message is there, the bug is in the website. If not, it's in the Arduino.</div>
+      </div>
+    </div>
+  </div>
   :root {
     --bg: #0d0b1e;
     --panel: #17142e;
