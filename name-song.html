@@ -3,107 +3,38 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>My IoT Page</title>
+<title>Name Song Machine</title>
 <style>
-  /* ---------- YOU CAN CHANGE ALL OF THIS ---------- */
-  body { font-family: Arial, sans-serif; max-width: 640px; margin: 24px auto; padding: 0 16px; background: #f5f5f5; color: #222; transition: background .3s, color .3s; }
-  h1   { margin-bottom: 4px; }
-  .card { background: #fff; color: #222; border-radius: 12px; padding: 20px; margin: 16px 0; box-shadow: 0 2px 6px rgba(0,0,0,.1); }
-  .status { font-size: 1.6rem; font-weight: bold; margin: 8px 0; }
-  .small { color: #666; font-size: .9rem; }
-  button { font-size: 1rem; padding: 10px 18px; margin: 4px; border: 0; border-radius: 8px; cursor: pointer; color: #fff; }
-  .red   { background: #d33; }
-  .green { background: #2a2; }
-  .blue  { background: #36c; }
-  .off   { background: #555; }
-  .beep  { background: #e90; }
-  .music { background: linear-gradient(90deg, #d33, #2a2); }
-  .flash { animation: flash .6s; }
-  @keyframes flash { from { background: #ffe66d; } to { background: #fff; } }
-  #errors { color: #b00; white-space: pre-wrap; }
-
-  /* ----- Name Song Machine ----- */
-  .namebox { font-size: 1.3rem; padding: 12px; border: 2px solid #ccc; border-radius: 8px; width: 100%; box-sizing: border-box; margin: 8px 0; }
-  .play    { background: #7b3fe4; font-size: 1.2rem; padding: 12px 24px; }
-
-  /* ----- Doorbell background effects ----- */
-  body.goaway { background: #c00; color: #fff; }
-  body.party { animation: party .5s infinite; color: #fff; }
-  @keyframes party {
-    0%   { background: #f33; }
-    25%  { background: #fc0; }
-    50%  { background: #3c3; }
-    75%  { background: #39f; }
-    100% { background: #f3f; }
-  }
-  body.creepy { animation: creepy 1.4s infinite; color: #ccc; }
-  @keyframes creepy {
-    0%   { background: #050505; }
-    8%   { background: #2a0040; }
-    10%  { background: #000; }
-    30%  { background: #000; }
-    32%  { background: #04300c; }
-    34%  { background: #000; }
-    60%  { background: #1a0010; }
-    62%  { background: #000; }
-    100% { background: #050505; }
-  }
+  body { font-family: Arial, sans-serif; max-width: 640px; margin: 24px auto; padding: 0 16px; background: #1b1035; color: #fff; }
+  h1   { margin-bottom: 4px; font-size: 2.2rem; }
+  .sub { color: #c9b8ff; margin-top: 0; }
+  .card { background: #fff; color: #222; border-radius: 16px; padding: 24px; margin: 16px 0; box-shadow: 0 4px 14px rgba(0,0,0,.3); }
+  .namebox { font-size: 1.5rem; padding: 14px; border: 2px solid #ccc; border-radius: 10px; width: 100%; box-sizing: border-box; margin: 8px 0 12px; }
+  .play { font-size: 1.4rem; padding: 14px 28px; border: 0; border-radius: 10px; cursor: pointer; color: #fff; background: #7b3fe4; width: 100%; }
+  .small { color: #666; font-size: .95rem; margin-top: 10px; }
+  .tiny  { color: #c9b8ff; font-size: .85rem; }
+  .tiny a { color: #c9b8ff; }
 </style>
 </head>
 <body>
 
-<h1>My IoT Page</h1>
-<p class="small">Adafruit IO user: <span id="whoami">?</span> &nbsp;|&nbsp; <a href="#" id="changeKey">change key</a></p>
-<p class="small">🔊 Click anywhere on the page once to turn on sound.</p>
+<h1>🎵 Name Song Machine</h1>
+<p class="sub">Type a name and hear what it sounds like!</p>
 
-<!-- ================= NAME SONG MACHINE ================= -->
 <div class="card">
-  <h2>🎵 Name Song Machine</h2>
-  <p class="small">Type a name and hear what it sounds like!</p>
   <input class="namebox" id="nameBox" type="text" maxlength="12" placeholder="Type a name...">
   <button class="play" onclick="sendName()">▶ Play my name</button>
   <div class="small" id="nameStatus"></div>
 </div>
 
-<!-- ================= PROJECT A : Arduino -> Website ================= -->
-<div class="card" id="cardA">
-  <h2>Doorbell</h2>
-  <div class="status" id="doorbellStatus">Waiting for the Arduino...</div>
-  <div class="small" id="doorbellTime"></div>
-  <div class="small">Presses since this page opened: <span id="doorbellCount">0</span></div>
-</div>
-
-<!-- ================= PROJECT B : Website -> Arduino ================= -->
-<div class="card">
-  <h2>Remote Lamp</h2>
-  <button class="red"   onclick="sendLamp('red')">Red</button>
-  <button class="green" onclick="sendLamp('green')">Green</button>
-  <button class="blue"  onclick="sendLamp('blue')">Blue</button>
-  <button class="off"   onclick="sendLamp('off')">Off</button>
-  <button class="beep"  onclick="sendLamp('beep')">Beep</button>
-  <button class="music" onclick="sendLamp('music')">🎄 Music</button>
-  <div class="small" id="lampStatus"></div>
-</div>
-
-<div class="card">
-  <h3>Problems?</h3>
-  <div id="errors" class="small">None yet.</div>
-</div>
+<p class="tiny">Adafruit IO user: <span id="whoami">?</span> &nbsp;|&nbsp; <a href="#" id="changeKey">change key</a></p>
 
 <script>
-/* =====================================================================
-   SETTINGS - change these two lines
-   ===================================================================== */
-const IO_USERNAME   = "eagle_vivien";   // <-- your Adafruit IO username
-const DOORBELL_FEED = "doorbell";       // Project A feed (Arduino -> web)
-const LAMP_FEED     = "lamp";           // Project B feed (web -> Arduino)
-const POLL_MS       = 2000;             // how often to check the doorbell feed (ms). Keep >= 2000.
+/* ---------- SETTINGS ---------- */
+const IO_USERNAME = "eagle_vivien";   // your Adafruit IO username
+const LAMP_FEED   = "lamp";           // the feed the Arduino listens to
 
-/* =====================================================================
-   YOUR KEY IS NOT IN THIS FILE ON PURPOSE.
-   This page is public on GitHub. Anyone can read this code. So the page
-   asks you for your key once and remembers it in THIS browser only.
-   ===================================================================== */
+/* ---------- KEY (stays in this browser only, never in this file) ---------- */
 function getKey() {
   let key = null;
   try { key = localStorage.getItem("aio_key"); } catch (e) {}
@@ -121,26 +52,15 @@ document.getElementById("changeKey").onclick = (e) => {
 
 const IO_KEY = getKey();
 document.getElementById("whoami").textContent = IO_USERNAME;
-
 const BASE = `https://io.adafruit.com/api/v2/${IO_USERNAME}/feeds/`;
 
-function showError(msg) {
-  document.getElementById("errors").textContent = msg;
-  console.error(msg);
-}
-
-/* =====================================================================
-   NAME SONG MACHINE - sends "name:<the name>" to the lamp feed
-   ===================================================================== */
+/* ---------- SEND THE NAME ---------- */
 async function sendName() {
   const box = document.getElementById("nameBox");
   const status = document.getElementById("nameStatus");
   const name = box.value.trim();
 
-  if (!name) {
-    status.textContent = "Type a name first!";
-    return;
-  }
+  if (!name) { status.textContent = "Type a name first!"; return; }
 
   status.textContent = "Sending '" + name + "'...";
   try {
@@ -149,6 +69,7 @@ async function sendName() {
       headers: { "Content-Type": "application/json", "X-AIO-Key": IO_KEY },
       body: JSON.stringify({ value: "name:" + name })
     });
+    if (res.status === 401) { status.textContent = "Wrong key. Click 'change key' below."; return; }
     if (res.status === 429) { status.textContent = "Slow down! Wait a few seconds and try again."; return; }
     if (!res.ok) { status.textContent = "Adafruit IO replied " + res.status; return; }
     status.textContent = "Sent '" + name + "' at " + new Date().toLocaleTimeString();
@@ -158,141 +79,10 @@ async function sendName() {
   }
 }
 
-// Pressing Enter in the box works too
+// Pressing Enter works too
 document.getElementById("nameBox").addEventListener("keydown", (e) => {
   if (e.key === "Enter") sendName();
 });
-
-/* =====================================================================
-   SOUND - browsers only allow sound after you click the page once
-   ===================================================================== */
-let audioCtx = null;
-document.addEventListener("click", () => {
-  if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-  if (audioCtx.state === "suspended") audioCtx.resume();
-});
-
-function playHorn() {
-  if (!audioCtx) return;
-  const start = audioCtx.currentTime;
-  [0, 0.7].forEach((offset) => {
-    [350, 440].forEach((freq) => {
-      const osc  = audioCtx.createOscillator();
-      const gain = audioCtx.createGain();
-      const t = start + offset;
-      osc.type = "sawtooth";
-      osc.frequency.value = freq;
-      gain.gain.setValueAtTime(0.0001, t);
-      gain.gain.exponentialRampToValueAtTime(0.15, t + 0.03);
-      gain.gain.setValueAtTime(0.15, t + 0.45);
-      gain.gain.exponentialRampToValueAtTime(0.0001, t + 0.55);
-      osc.connect(gain);
-      gain.connect(audioCtx.destination);
-      osc.start(t);
-      osc.stop(t + 0.6);
-    });
-  });
-}
-
-/* =====================================================================
-   BACKGROUND EFFECTS - each one lasts EFFECT_MS, then the page goes back
-   ===================================================================== */
-const EFFECT_MS = 6000;
-let effectTimer = null;
-
-function setEffect(name) {
-  document.body.classList.remove("goaway", "party", "creepy");
-  if (name) document.body.classList.add(name);
-  clearTimeout(effectTimer);
-  effectTimer = setTimeout(() => {
-    document.body.classList.remove("goaway", "party", "creepy");
-  }, EFFECT_MS);
-}
-
-/* =====================================================================
-   PROJECT A - read the doorbell feed every POLL_MS milliseconds
-   ===================================================================== */
-let lastSeenId = null;
-let count = 0;
-
-async function checkDoorbell() {
-  try {
-    const res = await fetch(BASE + DOORBELL_FEED + "/data/last", {
-      headers: { "X-AIO-Key": IO_KEY }
-    });
-    if (res.status === 404) { showError("Feed '" + DOORBELL_FEED + "' not found. Did you create it on io.adafruit.com?"); return; }
-    if (res.status === 401) { showError("401: wrong username or key. Click 'change key'."); return; }
-    if (!res.ok) { showError("Adafruit IO replied " + res.status); return; }
-
-    const data = await res.json();
-
-    if (data.id !== lastSeenId) {
-      const isFirstLoad = (lastSeenId === null);
-      lastSeenId = data.id;
-      if (!isFirstLoad) count++;
-      showDoorbell(data.value, data.created_at, !isFirstLoad);
-    }
-    document.getElementById("errors").textContent = "None. Connected.";
-  } catch (err) {
-    showError("Could not reach Adafruit IO: " + err.message);
-  }
-}
-
-function showDoorbell(value, createdAt, isNewPress) {
-  let message;
-  let effect = null;
-
-  if (value === "A") {
-    message = "Shhh... pretend we aren't home 🤫";
-    effect = "creepy";
-  } else if (value === "B") {
-    message = "Go away! 🚫";
-    effect = "goaway";
-  } else if (value === "C") {
-    message = "The doorbell rang! 🔔";
-    effect = "party";
-  } else {
-    message = "Button " + value + " was pressed";
-  }
-
-  document.getElementById("doorbellStatus").textContent = message;
-  document.getElementById("doorbellTime").textContent = "at " + new Date(createdAt).toLocaleTimeString();
-  document.getElementById("doorbellCount").textContent = count;
-
-  if (isNewPress) {
-    const card = document.getElementById("cardA");
-    card.classList.remove("flash");
-    void card.offsetWidth;
-    card.classList.add("flash");
-
-    if (effect) setEffect(effect);
-    if (value === "C") playHorn();
-  }
-}
-
-/* =====================================================================
-   PROJECT B - write to the lamp feed when a button is clicked
-   ===================================================================== */
-async function sendLamp(value) {
-  const status = document.getElementById("lampStatus");
-  status.textContent = "Sending '" + value + "'...";
-  try {
-    const res = await fetch(BASE + LAMP_FEED + "/data", {
-      method: "POST",
-      headers: { "Content-Type": "application/json", "X-AIO-Key": IO_KEY },
-      body: JSON.stringify({ value: value })
-    });
-    if (res.status === 429) { status.textContent = "Slow down! Rate limit hit (30 per minute)."; return; }
-    if (!res.ok) { status.textContent = "Adafruit IO replied " + res.status; return; }
-    status.textContent = "Sent '" + value + "' at " + new Date().toLocaleTimeString();
-  } catch (err) {
-    status.textContent = "Could not send: " + err.message;
-  }
-}
-
-/* ---------- start ---------- */
-checkDoorbell();
-setInterval(checkDoorbell, POLL_MS);
 </script>
 </body>
 </html>
