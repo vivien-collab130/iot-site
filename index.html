@@ -1,129 +1,260 @@
-/*
-  PROJECT A - Arduino -> Website  ("Doorbell")
-  Board: Arduino UNO R4 WiFi (Plug and Make Kit)
-  Modulino: Buttons + Buzzer
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>My IoT Page</title>
+<style>
+  /* ---------- YOU CAN CHANGE ALL OF THIS ---------- */
+  body { font-family: Arial, sans-serif; max-width: 640px; margin: 24px auto; padding: 0 16px; background: #f5f5f5; color: #222; transition: background .3s, color .3s; }
+  h1   { margin-bottom: 4px; }
+  .card { background: #fff; color: #222; border-radius: 12px; padding: 20px; margin: 16px 0; box-shadow: 0 2px 6px rgba(0,0,0,.1); }
+  .status { font-size: 1.6rem; font-weight: bold; margin: 8px 0; }
+  .small { color: #666; font-size: .9rem; }
+  button { font-size: 1rem; padding: 10px 18px; margin: 4px; border: 0; border-radius: 8px; cursor: pointer; color: #fff; }
+  .red   { background: #d33; }
+  .green { background: #2a2; }
+  .blue  { background: #36c; }
+  .off   { background: #555; }
+  .beep  { background: #e90; }
+  .music { background: linear-gradient(90deg, #d33, #2a2); }
+  .flash { animation: flash .6s; }
+  @keyframes flash { from { background: #ffe66d; } to { background: #fff; } }
+  #errors { color: #b00; white-space: pre-wrap; }
 
-  RATE LIMIT: Adafruit IO free accounts allow 30 messages per minute.
-  This sketch refuses to send more than one message every 2 seconds.
-  Do not remove that check.
-*/
+  /* ----- Doorbell background effects ----- */
 
-#include <WiFiS3.h>
-#include <ArduinoMqttClient.h>
-#include <Arduino_Modulino.h>
-#include "arduino_secrets.h"
+  /* B: Go away! -> red background */
+  body.goaway { background: #c00; color: #fff; }
 
-// ---------- SETTINGS ----------
-const char* ssid     = SECRET_SSID;
-const char* pass     = SECRET_PASS;
-const char* ioUser   = IO_USERNAME;
-const char* ioKey    = IO_KEY;
-
-const char  broker[] = "io.adafruit.com";
-const int   port     = 1883;
-
-const char  feedKey[]  = "doorbell";
-const char  clientId[] = "eagle-doorbell-vivien";
-
-// Minimum time between messages (milliseconds). Keep this >= 2000.
-const unsigned long MIN_GAP_MS = 2000;
-// ------------------------------
-
-WiFiClient      wifiClient;
-MqttClient      mqttClient(wifiClient);
-ModulinoButtons buttons;
-ModulinoBuzzer  buzzer;
-
-String        topic;
-unsigned long lastSendMs = 0;
-
-void setup() {
-  Serial.begin(9600);
-  delay(1500);
-
-  Modulino.begin();
-  buttons.begin();
-  buzzer.begin();
-  buttons.setLeds(true, true, true);   // all three button lights on
-
-  topic = String(ioUser) + "/feeds/" + feedKey;
-
-  connectWiFi();
-  connectMQTT();
-
-  Serial.println("Ready. Press A, B, or C.");
-}
-
-void loop() {
-  mqttClient.poll();
-
-  if (!mqttClient.connected()) {
-    Serial.println("MQTT disconnected. Reconnecting...");
-    connectMQTT();
+  /* C: Doorbell rang -> party lights */
+  body.party { animation: party .5s infinite; color: #fff; }
+  @keyframes party {
+    0%   { background: #f33; }
+    25%  { background: #fc0; }
+    50%  { background: #3c3; }
+    75%  { background: #39f; }
+    100% { background: #f3f; }
   }
 
-  if (buttons.update()) {
-    if (buttons.isPressed('A')) {
-      sendEvent("A");
+  /* A: Shhh... -> creepy flickering lights */
+  body.creepy { animation: creepy 1.4s infinite; color: #ccc; }
+  @keyframes creepy {
+    0%   { background: #050505; }
+    8%   { background: #2a0040; }
+    10%  { background: #000; }
+    30%  { background: #000; }
+    32%  { background: #04300c; }
+    34%  { background: #000; }
+    60%  { background: #1a0010; }
+    62%  { background: #000; }
+    100% { background: #050505; }
+  }
+</style>
+</head>
+<body>
+
+<h1>My IoT Page</h1>
+<p class="small">Adafruit IO user: <span id="whoami">?</span> &nbsp;|&nbsp; <a href="#" id="changeKey">change key</a></p>
+<p class="small">🔊 Click anywhere on the page once to turn on sound.</p>
+
+<!-- ================= PROJECT A : Arduino -> Website ================= -->
+<div class="card" id="cardA">
+  <h2>Doorbell</h2>
+  <div class="status" id="doorbellStatus">Waiting for the Arduino...</div>
+  <div class="small" id="doorbellTime"></div>
+  <div class="small">Presses since this page opened: <span id="doorbellCount">0</span></div>
+</div>
+
+<!-- ================= PROJECT B : Website -> Arduino ================= -->
+<div class="card">
+  <h2>Remote Lamp</h2>
+  <button class="red"   onclick="sendLamp('red')">Red</button>
+  <button class="green" onclick="sendLamp('green')">Green</button>
+  <button class="blue"  onclick="sendLamp('blue')">Blue</button>
+  <button class="off"   onclick="sendLamp('off')">Off</button>
+  <button class="beep"  onclick="sendLamp('beep')">Beep</button>
+  <button class="music" onclick="sendLamp('music')">🎄 Music</button>
+  <div class="small" id="lampStatus"></div>
+</div>
+
+<div class="card">
+  <h3>Problems?</h3>
+  <div id="errors" class="small">None yet.</div>
+</div>
+
+<script>
+/* =====================================================================
+   SETTINGS - change these two lines
+   ===================================================================== */
+const IO_USERNAME   = "eagle_vivien";   // <-- your Adafruit IO username
+const DOORBELL_FEED = "doorbell";       // Project A feed (Arduino -> web)
+const LAMP_FEED     = "lamp";           // Project B feed (web -> Arduino)
+const POLL_MS       = 2000;             // how often to check the doorbell feed (ms). Keep >= 2000.
+
+/* =====================================================================
+   YOUR KEY IS NOT IN THIS FILE ON PURPOSE.
+   This page is public on GitHub. Anyone can read this code. So the page
+   asks you for your key once and remembers it in THIS browser only.
+   ===================================================================== */
+function getKey() {
+  let key = null;
+  try { key = localStorage.getItem("aio_key"); } catch (e) {}
+  if (!key) {
+    key = prompt("Paste your Adafruit IO key (starts with aio_). It stays in this browser only.");
+    if (key) { try { localStorage.setItem("aio_key", key.trim()); } catch (e) {} }
+  }
+  return key ? key.trim() : "";
+}
+document.getElementById("changeKey").onclick = (e) => {
+  e.preventDefault();
+  try { localStorage.removeItem("aio_key"); } catch (e2) {}
+  location.reload();
+};
+
+const IO_KEY = getKey();
+document.getElementById("whoami").textContent = IO_USERNAME;
+
+const BASE = `https://io.adafruit.com/api/v2/${IO_USERNAME}/feeds/`;
+
+function showError(msg) {
+  document.getElementById("errors").textContent = msg;
+  console.error(msg);
+}
+
+/* =====================================================================
+   SOUND - browsers only allow sound after you click the page once
+   ===================================================================== */
+let audioCtx = null;
+document.addEventListener("click", () => {
+  if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  if (audioCtx.state === "suspended") audioCtx.resume();
+});
+
+// Plays a car-horn style "HONK HONK"
+function playHorn() {
+  if (!audioCtx) return;   // no sound until the page has been clicked
+  const start = audioCtx.currentTime;
+  [0, 0.7].forEach((offset) => {          // two honks
+    [350, 440].forEach((freq) => {        // two notes at once sound like a horn
+      const osc  = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      const t = start + offset;
+      osc.type = "sawtooth";
+      osc.frequency.value = freq;
+      gain.gain.setValueAtTime(0.0001, t);
+      gain.gain.exponentialRampToValueAtTime(0.15, t + 0.03);
+      gain.gain.setValueAtTime(0.15, t + 0.45);
+      gain.gain.exponentialRampToValueAtTime(0.0001, t + 0.55);
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+      osc.start(t);
+      osc.stop(t + 0.6);
+    });
+  });
+}
+
+/* =====================================================================
+   BACKGROUND EFFECTS - each one lasts EFFECT_MS, then the page goes back
+   ===================================================================== */
+const EFFECT_MS = 6000;
+let effectTimer = null;
+
+function setEffect(name) {
+  document.body.classList.remove("goaway", "party", "creepy");
+  if (name) document.body.classList.add(name);
+  clearTimeout(effectTimer);
+  effectTimer = setTimeout(() => {
+    document.body.classList.remove("goaway", "party", "creepy");
+  }, EFFECT_MS);
+}
+
+/* =====================================================================
+   PROJECT A - read the doorbell feed every POLL_MS milliseconds
+   ===================================================================== */
+let lastSeenId = null;   // id of the newest data point we have already shown
+let count = 0;
+
+async function checkDoorbell() {
+  try {
+    const res = await fetch(BASE + DOORBELL_FEED + "/data/last", {
+      headers: { "X-AIO-Key": IO_KEY }
+    });
+    if (res.status === 404) { showError("Feed '" + DOORBELL_FEED + "' not found. Did you create it on io.adafruit.com?"); return; }
+    if (res.status === 401) { showError("401: wrong username or key. Click 'change key'."); return; }
+    if (!res.ok) { showError("Adafruit IO replied " + res.status); return; }
+
+    const data = await res.json();       // { id, value, created_at, ... }
+
+    if (data.id !== lastSeenId) {        // something NEW happened on the Arduino
+      const isFirstLoad = (lastSeenId === null);
+      lastSeenId = data.id;
+      if (!isFirstLoad) count++;
+      showDoorbell(data.value, data.created_at, !isFirstLoad);
     }
-    if (buttons.isPressed('B')) {
-      sendEvent("B");
-    }
-    if (buttons.isPressed('C')) {
-      sendEvent("C");
-      playHorn();          // HONK HONK on the Buzzer
-    }
+    document.getElementById("errors").textContent = "None. Connected.";
+  } catch (err) {
+    showError("Could not reach Adafruit IO: " + err.message);
   }
 }
 
-// Car-horn style "HONK HONK" on the Modulino Buzzer.
-void playHorn() {
-  for (int i = 0; i < 2; i++) {
-    buzzer.tone(400, 450);   // low, loud note = horn
-    delay(450 + 150);        // wait for the honk, plus a short gap
+function showDoorbell(value, createdAt, isNewPress) {
+  // Turn the button letter into a real sentence + pick an effect.
+  let message;
+  let effect = null;
+
+  if (value === "A") {
+    message = "Shhh... pretend we aren't home 🤫";
+    effect = "creepy";
+  } else if (value === "B") {
+    message = "Go away! 🚫";
+    effect = "goaway";
+  } else if (value === "C") {
+    message = "The doorbell rang! 🔔";
+    effect = "party";
+  } else {
+    message = "Button " + value + " was pressed";
+  }
+
+  document.getElementById("doorbellStatus").textContent = message;
+  document.getElementById("doorbellTime").textContent = "at " + new Date(createdAt).toLocaleTimeString();
+  document.getElementById("doorbellCount").textContent = count;
+
+  // Only do effects for a NEW press, not when the page first loads.
+  if (isNewPress) {
+    const card = document.getElementById("cardA");
+    card.classList.remove("flash");
+    void card.offsetWidth;               // restart the animation
+    card.classList.add("flash");
+
+    if (effect) setEffect(effect);
+    if (value === "C") playHorn();
   }
 }
 
-// Publishes one message to the feed, but only if enough time has passed.
-void sendEvent(const char* value) {
-  unsigned long now = millis();
-  if (now - lastSendMs < MIN_GAP_MS) {
-    Serial.println("Too soon - ignored (rate limit protection).");
-    return;
+/* =====================================================================
+   PROJECT B - write to the lamp feed when a button is clicked
+   ===================================================================== */
+async function sendLamp(value) {
+  const status = document.getElementById("lampStatus");
+  status.textContent = "Sending '" + value + "'...";
+  try {
+    const res = await fetch(BASE + LAMP_FEED + "/data", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "X-AIO-Key": IO_KEY },
+      body: JSON.stringify({ value: value })
+    });
+    if (res.status === 429) { status.textContent = "Slow down! Rate limit hit (30 per minute)."; return; }
+    if (!res.ok) { status.textContent = "Adafruit IO replied " + res.status; return; }
+    status.textContent = "Sent '" + value + "' at " + new Date().toLocaleTimeString();
+  } catch (err) {
+    status.textContent = "Could not send: " + err.message;
   }
-  lastSendMs = now;
-
-  Serial.print("Sending: ");
-  Serial.println(value);
-
-  mqttClient.beginMessage(topic);
-  mqttClient.print(value);
-  mqttClient.endMessage();
 }
 
-void connectWiFi() {
-  Serial.print("Connecting to WiFi: ");
-  Serial.println(ssid);
-  while (WiFi.begin(ssid, pass) != WL_CONNECTED) {
-    Serial.print(".");
-    delay(3000);
-  }
-  Serial.print("\nConnected. IP address: ");
-  Serial.println(WiFi.localIP());
-}
-
-void connectMQTT() {
-  mqttClient.setId(clientId);
-  mqttClient.setUsernamePassword(ioUser, ioKey);
-
-  Serial.print("Connecting to Adafruit IO as ");
-  Serial.println(ioUser);
-
-  while (!mqttClient.connect(broker, port)) {
-    Serial.print("MQTT connect failed, error code = ");
-    Serial.println(mqttClient.connectError());
-    Serial.println("Check IO_USERNAME / IO_KEY in arduino_secrets.h. Retrying in 5 s...");
-    delay(5000);
-  }
-  Serial.println("Connected to Adafruit IO!");
-}
+/* ---------- start ---------- */
+checkDoorbell();
+setInterval(checkDoorbell, POLL_MS);
+</script>
+</body>
+</html>
