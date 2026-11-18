@@ -7,34 +7,53 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
 <style>
-  /* ===================== FANTASY BOOK COLORS ===================== */
+  /* ============ ELEGANT JEWEL TONES + FANTASY BOOK PAGES ============ */
   :root {
-    --ink: #3b2a1a;
-    --parchment: #f3e6c4;
-    --parchment-dark: #e2cf9f;
+    --ink: #2e2216;
+    --parchment: #f5ead2;
+    --parchment-dark: #e6d6ad;
     --gold: #c9a24a;
-    --gold-bright: #f1cf6b;
+    --gold-bright: #f4d47a;
     --burgundy: #7a1f2b;
-    --forest: #2f5d3a;
+    --forest: #1f6b4a;
+    --sapphire: #1e4fd1;
     --dot-off: #2a1a0e;
     --dot-on: #ffb347;
     --font: "Poppins", Arial, sans-serif;
   }
   * { box-sizing: border-box; }
 
-  /* Dark leather background with candlelight */
+  /* Midnight sapphire + plum background with soft jewel glows */
   body {
-    margin: 0; padding: 20px 16px 40px;
+    margin: 0; padding: 22px 16px 44px;
     font-family: var(--font);
-    font-size: 17px;
+    font-size: 19px;
+    line-height: 1.5;
     color: var(--parchment);
     min-height: 100vh;
     background:
-      radial-gradient(ellipse at center, rgba(0,0,0,0) 40%, rgba(0,0,0,.65) 100%),
-      radial-gradient(circle at 20% 15%, rgba(241,207,107,.14) 0%, transparent 35%),
-      radial-gradient(circle at 80% 70%, rgba(47,93,58,.28) 0%, transparent 40%),
-      linear-gradient(160deg, #2b1a12 0%, #1a110b 100%);
+      radial-gradient(circle at 15% 10%, rgba(30,79,209,.35) 0%, transparent 45%),
+      radial-gradient(circle at 85% 30%, rgba(18,138,90,.28) 0%, transparent 45%),
+      radial-gradient(circle at 50% 95%, rgba(241,207,107,.16) 0%, transparent 50%),
+      linear-gradient(160deg, #0f1b3d 0%, #1a1240 55%, #0b0f24 100%);
     background-attachment: fixed;
+  }
+
+  /* Slow drifting aurora of light (smooth, never flashy) */
+  body::after {
+    content: ""; position: fixed; inset: -20%;
+    pointer-events: none; z-index: 0;
+    background:
+      radial-gradient(ellipse 40% 25% at 30% 30%, rgba(30,79,209,.22), transparent 70%),
+      radial-gradient(ellipse 35% 22% at 70% 55%, rgba(18,138,90,.2), transparent 70%),
+      radial-gradient(ellipse 30% 20% at 45% 80%, rgba(244,212,122,.12), transparent 70%);
+    filter: blur(30px);
+    animation: aurora 30s ease-in-out infinite alternate;
+  }
+  @keyframes aurora {
+    0%   { transform: translate(0, 0) rotate(0deg); }
+    50%  { transform: translate(4%, -3%) rotate(6deg); }
+    100% { transform: translate(-4%, 3%) rotate(-6deg); }
   }
 
   /* Floating gold sparkles */
@@ -42,42 +61,42 @@
     content: ""; position: fixed; left: 0; right: 0; top: 0; bottom: -240px;
     pointer-events: none; z-index: 0;
     background-image:
-      radial-gradient(1.5px 1.5px at 20px 30px,  rgba(241,207,107,.9), transparent),
+      radial-gradient(1.5px 1.5px at 20px 30px,  rgba(244,212,122,.9), transparent),
       radial-gradient(1px 1px     at 120px 80px, rgba(255,255,255,.8), transparent),
-      radial-gradient(2px 2px     at 200px 160px, rgba(241,207,107,.7), transparent),
+      radial-gradient(2px 2px     at 200px 160px, rgba(244,212,122,.7), transparent),
       radial-gradient(1px 1px     at 60px 200px, rgba(255,240,200,.8), transparent),
-      radial-gradient(1.5px 1.5px at 260px 40px, rgba(241,207,107,.6), transparent);
+      radial-gradient(1.5px 1.5px at 260px 40px, rgba(244,212,122,.6), transparent);
     background-size: 300px 240px;
-    animation: drift 24s linear infinite, twinkle 4s ease-in-out infinite alternate;
+    animation: drift 28s linear infinite, twinkle 5s ease-in-out infinite alternate;
   }
   @keyframes drift   { to { transform: translateY(-240px); } }
-  @keyframes twinkle { from { opacity: .35; } to { opacity: .85; } }
+  @keyframes twinkle { from { opacity: .35; } to { opacity: .8; } }
 
-  .wrap { max-width: 760px; margin: 0 auto; position: relative; z-index: 1; }
+  .wrap { max-width: 780px; margin: 0 auto; position: relative; z-index: 1; }
 
   /* Title */
   h1 {
     font-family: var(--font); font-weight: 800;
-    font-size: clamp(1.8rem, 6.5vw, 3rem);
+    font-size: clamp(2rem, 7vw, 3.3rem);
     text-align: center; margin: 8px 0 6px;
     color: var(--gold-bright);
-    text-shadow: 0 0 18px rgba(241,207,107,.45), 0 2px 0 #5a3d10;
+    text-shadow: 0 0 22px rgba(244,212,122,.45), 0 2px 0 #5a3d10;
     letter-spacing: 1px;
   }
-  h1::before, h1::after { content: " ✦ "; color: var(--gold); font-size: .6em; vertical-align: middle; }
-  .tagline { text-align: center; color: var(--parchment-dark); font-size: 1.1rem; margin: 0 0 6px; }
-  .soundhint { text-align: center; color: #b9a57c; font-size: .9rem; margin: 0 0 18px; }
-  .soundhint.on { color: #9fd18b; }
+  h1::before, h1::after { content: " ✦ "; color: var(--gold); font-size: .55em; vertical-align: middle; }
+  .tagline { text-align: center; color: var(--parchment-dark); font-size: 1.2rem; margin: 0 0 6px; }
+  .soundhint { text-align: center; color: #c9b88e; font-size: 1rem; margin: 0 0 20px; }
+  .soundhint.on { color: #8fe0b0; }
 
   /* Wood + gold frame around the Arduino, glowing ember lights */
   .board {
     background: linear-gradient(145deg, #4a2e1a, #2a180c);
     border: 3px solid var(--gold);
     border-radius: 18px; padding: 22px;
-    margin: 0 auto 18px; max-width: 460px;
-    box-shadow: 0 0 0 6px #2a180c, 0 0 0 8px var(--gold), 0 0 40px rgba(241,207,107,.3);
+    margin: 0 auto 18px; max-width: 470px;
+    box-shadow: 0 0 0 6px #2a180c, 0 0 0 8px var(--gold), 0 0 50px rgba(30,79,209,.35), 0 0 80px rgba(244,212,122,.2);
   }
-  .board-label { font-weight: 600; font-size: .8rem; color: var(--gold-bright); text-align: right; margin-bottom: 10px; }
+  .board-label { font-weight: 600; font-size: .85rem; color: var(--gold-bright); text-align: right; margin-bottom: 10px; }
   .matrix { display: grid; grid-template-columns: repeat(12, 1fr); gap: 6px; background: #120b06; padding: 14px; border-radius: 10px; }
   .dot { aspect-ratio: 1; border-radius: 3px; background: var(--dot-off); transition: background .15s, box-shadow .15s; }
   .dot.on { background: var(--dot-on); box-shadow: 0 0 8px var(--dot-on), 0 0 18px rgba(255,179,71,.6); }
@@ -88,149 +107,164 @@
   /* Status text */
   .status {
     font-weight: 800; text-align: center;
-    font-size: clamp(1.2rem, 4.8vw, 1.8rem);
-    color: var(--gold-bright); text-shadow: 0 0 12px rgba(241,207,107,.5);
+    font-size: clamp(1.4rem, 5.2vw, 2rem);
+    color: var(--gold-bright); text-shadow: 0 0 14px rgba(244,212,122,.5);
     margin: 10px 0 6px; line-height: 1.3;
   }
-  .sub { text-align: center; color: var(--parchment-dark); font-size: 1.1rem; margin-bottom: 18px; }
+  .sub { text-align: center; color: var(--parchment); font-size: 1.2rem; margin-bottom: 20px; }
   .banner {
     display: none; text-align: center;
     font-weight: 800; color: var(--gold-bright);
-    font-size: clamp(1rem, 4vw, 1.4rem); margin: 0 0 16px;
-    animation: pulse .8s infinite alternate;
+    font-size: clamp(1.1rem, 4.2vw, 1.5rem); margin: 0 0 16px;
+    animation: pulse 1.2s ease-in-out infinite alternate;
   }
   .banner.show { display: block; }
-  @keyframes pulse { from { opacity: .5; transform: scale(.97); } to { opacity: 1; transform: scale(1.03); } }
+  @keyframes pulse { from { opacity: .6; transform: scale(.98); } to { opacity: 1; transform: scale(1.03); } }
 
   /* Each section is a parchment page */
   .card {
     background:
-      radial-gradient(ellipse at center, rgba(255,255,255,.35) 0%, transparent 70%),
-      linear-gradient(180deg, #f6ead0 0%, #e9d6a8 100%);
+      radial-gradient(ellipse at center, rgba(255,255,255,.4) 0%, transparent 70%),
+      linear-gradient(180deg, #f8eed8 0%, #ecdcb0 100%);
     color: var(--ink);
     border: 2px solid var(--gold);
-    border-radius: 6px;
-    padding: 22px 18px;
-    margin: 16px 0;
-    box-shadow: inset 0 0 30px rgba(120,80,30,.35), 0 8px 24px rgba(0,0,0,.5);
+    border-radius: 8px;
+    padding: 24px 20px;
+    margin: 18px 0;
+    box-shadow: inset 0 0 30px rgba(120,80,30,.3), 0 10px 28px rgba(0,0,0,.45);
     outline: 1px solid rgba(201,162,74,.5);
     outline-offset: -8px;
-    transition: transform .2s, box-shadow .2s;
+    transition: transform .25s, box-shadow .25s;
   }
-  .card:hover { transform: translateY(-3px); box-shadow: inset 0 0 30px rgba(120,80,30,.35), 0 14px 30px rgba(0,0,0,.55); }
-  .card h2 { font-weight: 800; font-size: 1.1rem; color: var(--burgundy); letter-spacing: .5px; text-align: center; margin: 0 0 4px; }
+  .card:hover { transform: translateY(-3px); box-shadow: inset 0 0 30px rgba(120,80,30,.3), 0 16px 34px rgba(0,0,0,.5); }
+  .card h2 { font-weight: 800; font-size: 1.2rem; color: var(--burgundy); letter-spacing: .5px; text-align: center; margin: 0 0 6px; }
   .card h2::before { content: "❦ "; color: var(--gold); }
   .card h2::after  { content: " ❦"; color: var(--gold); }
-  .card .what { color: #5b4630; text-align: center; margin: 0 0 14px; font-size: .98rem; }
+  .card .what { color: #4f3d28; text-align: center; margin: 0 0 16px; font-size: 1.05rem; }
 
-  /* Button key: glowing gems */
-  .keyrow { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; }
+  /* Button key: jewel gems (same red / green / blue as the Arduino) */
+  .keyrow { display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; }
   .gem {
-    width: 120px; padding: 14px 8px 12px;
-    border: 2px solid var(--gold); border-radius: 16px;
+    width: 132px; padding: 14px 8px 14px;
+    border: 2px solid var(--gold); border-radius: 18px;
     cursor: pointer; color: #fff; text-align: center;
     font-family: var(--font);
     background:
-      radial-gradient(circle at 30% 25%, rgba(255,255,255,.55), transparent 40%),
-      var(--gem);
-    box-shadow: 0 5px 0 rgba(0,0,0,.35), inset 0 -6px 12px rgba(0,0,0,.25);
-    transition: transform .1s, box-shadow .2s;
+      radial-gradient(circle at 30% 22%, rgba(255,255,255,.55), transparent 42%),
+      linear-gradient(160deg, var(--gem-light), var(--gem));
+    box-shadow: 0 6px 0 rgba(0,0,0,.3), inset 0 -8px 14px rgba(0,0,0,.25);
+    transition: transform .12s, box-shadow .25s;
   }
-  .gem .letter { font-size: 2.2rem; font-weight: 800; display: block; line-height: 1.1; text-shadow: 0 2px 4px rgba(0,0,0,.4); }
-  .gem .label  { font-size: 1rem; font-weight: 600; display: block; }
-  .gem .note   { font-size: .85rem; display: block; opacity: .9; }
-  .gem.red   { --gem: #b3122e; }
-  .gem.green { --gem: #1f8a4c; }
-  .gem.blue  { --gem: #1f4fb3; }
+  .gem .shape  { font-size: 1.3rem; display: block; opacity: .95; }
+  .gem .letter { font-size: 2.4rem; font-weight: 800; display: block; line-height: 1.1; text-shadow: 0 2px 4px rgba(0,0,0,.4); }
+  .gem .label  { font-size: 1.1rem; font-weight: 600; display: block; }
+  .gem .note   { font-size: .95rem; display: block; opacity: .95; }
+  .gem.red   { --gem: #9e0f2c; --gem-light: #d8304f; }
+  .gem.green { --gem: #0d6e46; --gem-light: #22a86d; }
+  .gem.blue  { --gem: #173f9e; --gem-light: #3a6fe6; }
   .gem:hover { transform: translateY(-2px); }
   .gem.lit, .gem:active {
     transform: translateY(3px) scale(1.06);
-    box-shadow: 0 0 22px var(--gem), 0 0 46px var(--gem), inset 0 -6px 12px rgba(0,0,0,.25);
+    box-shadow: 0 0 24px var(--gem-light), 0 0 50px var(--gem-light), inset 0 -8px 14px rgba(0,0,0,.25);
   }
 
   /* Leaderboard */
-  .beat { text-align: center; font-size: 1.1rem; margin-bottom: 12px; color: var(--ink); }
-  .beat b { color: var(--burgundy); font-weight: 800; font-size: 1.7rem; }
-  ol.scores { margin: 0; padding-left: 28px; }
-  ol.scores li { padding: 6px 0; border-bottom: 1px solid rgba(122,31,43,.25); font-size: 1.05rem; color: var(--ink); }
+  .beat { text-align: center; font-size: 1.2rem; margin-bottom: 12px; color: var(--ink); }
+  .beat b { color: var(--burgundy); font-weight: 800; font-size: 1.9rem; }
+  ol.scores { margin: 0; padding-left: 30px; }
+  ol.scores li { padding: 8px 0; border-bottom: 1px solid rgba(122,31,43,.25); font-size: 1.15rem; color: var(--ink); }
   ol.scores li:last-child { border-bottom: 0; }
   ol.scores li b { color: var(--forest); }
-  ol.scores li:nth-child(1) b { color: #a67c00; }
-  ol.scores li:nth-child(2) b { color: #6b6b7a; }
+  ol.scores li:nth-child(1) b { color: #9a7300; }
+  ol.scores li:nth-child(2) b { color: #5e5e6e; }
   ol.scores li:nth-child(3) b { color: #8a4b1f; }
   ol.scores li:nth-child(1)::after { content: "  🥇"; }
   ol.scores li:nth-child(2)::after { content: "  🥈"; }
   ol.scores li:nth-child(3)::after { content: "  🥉"; }
-  ol.scores .when, .empty { color: #7a6448; }
+  ol.scores .when, .empty { color: #6e5a40; }
+
+  /* Did you know + About the maker */
+  .facts { display: grid; gap: 12px; }
+  .fact { background: rgba(255,255,255,.4); border: 1px solid rgba(201,162,74,.6); border-left: 5px solid var(--sapphire); border-radius: 10px; padding: 14px; font-size: 1.05rem; }
+  .fact:nth-child(2) { border-left-color: var(--forest); }
+  .fact:nth-child(3) { border-left-color: var(--gold); }
+  .fact b { color: var(--burgundy); }
+  .maker-hi { text-align: center; font-size: 1.15rem; margin: 0 0 14px; }
+  .maker-hi b { color: var(--burgundy); font-size: 1.3rem; }
+  .loves { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; }
+  .love { background: rgba(255,255,255,.4); border: 1px solid rgba(201,162,74,.6); border-radius: 12px; padding: 14px; text-align: center; }
+  .love .icon { font-size: 2rem; }
+  .love .name { font-weight: 800; color: var(--burgundy); font-size: 1.1rem; }
+  .love .how  { color: #4f3d28; font-size: 1rem; }
 
   /* Live messages */
   .serial {
     background: #1c130d; border: 1px solid #5a3d10; border-radius: 8px;
-    padding: 12px; min-height: 150px; max-height: 240px; overflow-y: auto;
-    font-family: "JetBrains Mono", monospace; font-size: .85rem; line-height: 1.6;
+    padding: 12px; min-height: 150px; max-height: 260px; overflow-y: auto;
+    font-family: "JetBrains Mono", monospace; font-size: .92rem; line-height: 1.6;
   }
-  .serial .row { border-bottom: 1px dashed #3a2a1a; padding: 4px 0; }
-  .serial .t { color: #9c8462; }
+  .serial .row { border-bottom: 1px dashed #3a2a1a; padding: 5px 0; }
+  .serial .t { color: #a8916b; }
   .serial .raw { color: var(--gold-bright); font-weight: 700; }
-  .serial .plain { color: #f3e6c4; font-family: var(--font); font-size: .95rem; display: block; padding-left: 12px; }
-  .serial .empty { color: #9c8462; }
+  .serial .plain { color: #f5ead2; font-family: var(--font); font-size: 1rem; display: block; padding-left: 12px; }
+  .serial .empty { color: #a8916b; }
 
   /* Code box */
-  .code { background: #1c130d; border: 1px solid #5a3d10; border-radius: 8px; padding: 10px 0; font-family: "JetBrains Mono", monospace; font-size: .82rem; overflow-x: auto; }
-  .code .ln { display: block; padding: 2px 14px; white-space: pre; color: #c9b38a; border-left: 4px solid transparent; transition: background .2s; }
+  .code { background: #1c130d; border: 1px solid #5a3d10; border-radius: 8px; padding: 10px 0; font-family: "JetBrains Mono", monospace; font-size: .9rem; overflow-x: auto; }
+  .code .ln { display: block; padding: 3px 14px; white-space: pre; color: #d4c09a; border-left: 4px solid transparent; transition: background .2s; }
   .code .ln.clickable { cursor: pointer; }
-  .code .ln.clickable:hover { background: rgba(241,207,107,.08); }
-  .code .ln.hl { background: rgba(241,207,107,.18); border-left-color: var(--gold-bright); color: #fff7e0; }
-  .code .kw { color: #e07a8a; }
-  .code .fn { color: #9fd18b; }
-  .code .cm { color: #8a7458; font-style: italic; }
+  .code .ln.clickable:hover { background: rgba(244,212,122,.08); }
+  .code .ln.hl { background: rgba(244,212,122,.2); border-left-color: var(--gold-bright); color: #fff8e6; }
+  .code .kw { color: #f08a9a; }
+  .code .fn { color: #9fe0a0; }
+  .code .cm { color: #9a8462; font-style: italic; }
   .explain-line {
-    margin-top: 12px; padding: 12px 14px; border-radius: 10px; min-height: 48px;
-    background: rgba(122,31,43,.1); border: 1px solid rgba(122,31,43,.3);
-    color: var(--ink); font-size: 1.02rem;
+    margin-top: 12px; padding: 14px 16px; border-radius: 10px; min-height: 52px;
+    background: rgba(122,31,43,.08); border: 1px solid rgba(122,31,43,.3);
+    color: var(--ink); font-size: 1.12rem;
   }
   .explain-line b { color: var(--burgundy); }
 
   /* Mailbox */
-  .mailbox { display: flex; align-items: center; gap: 16px; }
-  .mailbox .icon { font-size: 2.6rem; transition: transform .2s; }
+  .mailbox { display: flex; align-items: center; gap: 18px; }
+  .mailbox .icon { font-size: 2.8rem; transition: transform .2s; }
   .mailbox .icon.check { animation: bump .6s; }
   @keyframes bump { 0% { transform: scale(1); } 40% { transform: scale(1.25) rotate(-8deg); } 100% { transform: scale(1); } }
-  .mailbox .info { font-size: 1.05rem; color: var(--ink); }
+  .mailbox .info { font-size: 1.12rem; color: var(--ink); }
   .mailbox .info b { color: var(--burgundy); }
   .newmail { color: var(--forest); font-weight: bold; }
 
   /* What I Learned */
-  .learned { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; }
-  .skill { background: rgba(255,255,255,.35); border: 1px solid rgba(201,162,74,.6); border-left: 4px solid var(--burgundy); border-radius: 8px; padding: 12px; color: var(--ink); transition: transform .2s, background .2s; }
-  .skill:hover { transform: translateY(-3px); background: rgba(255,255,255,.55); }
-  .skill .name { font-weight: 800; font-size: 1rem; margin-bottom: 4px; }
-  .skill .used { color: #4d3a26; font-size: .95rem; }
-  .skill:nth-child(3n+1) { border-left-color: var(--burgundy); }
+  .learned { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 12px; }
+  .skill { background: rgba(255,255,255,.4); border: 1px solid rgba(201,162,74,.6); border-left: 5px solid var(--burgundy); border-radius: 10px; padding: 14px; color: var(--ink); transition: transform .25s, background .25s; }
+  .skill:hover { transform: translateY(-3px); background: rgba(255,255,255,.6); }
+  .skill .name { font-weight: 800; font-size: 1.05rem; margin-bottom: 4px; }
+  .skill .used { color: #45351f; font-size: 1rem; }
+  .skill:nth-child(3n+1) { border-left-color: var(--sapphire); }
   .skill:nth-child(3n+2) { border-left-color: var(--forest); }
   .skill:nth-child(3n)   { border-left-color: var(--gold); }
-  .skill:nth-child(3n+1) .name { color: var(--burgundy); }
+  .skill:nth-child(3n+1) .name { color: var(--sapphire); }
   .skill:nth-child(3n+2) .name { color: var(--forest); }
   .skill:nth-child(3n)   .name { color: #8a6a1c; }
 
   /* How it connects */
-  .steps { display: flex; align-items: center; justify-content: center; gap: 10px; flex-wrap: wrap; text-align: center; }
-  .step { background: rgba(255,255,255,.35); border: 1px solid var(--gold); border-radius: 10px; padding: 10px 12px; min-width: 120px; color: var(--ink); }
-  .step .icon { font-size: 1.8rem; }
-  .arrow { color: var(--burgundy); font-size: 1.4rem; }
-  .explain { color: #5b4630; text-align: center; margin: 12px 0 0; }
+  .steps { display: flex; align-items: center; justify-content: center; gap: 12px; flex-wrap: wrap; text-align: center; }
+  .step { background: rgba(255,255,255,.4); border: 1px solid var(--gold); border-radius: 12px; padding: 12px 14px; min-width: 130px; color: var(--ink); }
+  .step .icon { font-size: 2rem; }
+  .arrow { color: var(--burgundy); font-size: 1.6rem; }
+  .explain { color: #4f3d28; text-align: center; margin: 14px 0 0; }
 
   /* Footer */
-  .footer { color: var(--parchment-dark); font-size: .85rem; text-align: center; margin-top: 18px; }
+  .footer { color: var(--parchment-dark); font-size: .9rem; text-align: center; margin-top: 20px; }
   .footer a { color: var(--gold-bright); }
-  #problem { color: #ff9a8a; }
+  #problem { color: #ffaa9a; }
 </style>
 </head>
 <body>
 <div class="wrap">
 
-  <h1>Beat the Machine</h1>
-  <p class="tagline">Watch the lights. Copy the pattern. Beat the high score.</p>
+  <h1>Play It Back</h1>
+  <p class="tagline">Watch the lights. Listen to the notes. Play it back.</p>
   <p class="soundhint" id="soundHint">🔊 Tap anywhere once to wake the sound.</p>
 
   <!-- Pretend Arduino LED matrix -->
@@ -249,13 +283,13 @@
     <p class="what">Each button is a piano key. Together, C, G and E make a happy chord, so every pattern sounds like a little song. Tap one to hear it!</p>
     <div class="keyrow">
       <button class="gem red" data-i="0">
-        <span class="letter">A</span><span class="label">Red</span><span class="note">piano key C</span>
+        <span class="shape">▼</span><span class="letter">A</span><span class="label">Red</span><span class="note">low · piano key C</span>
       </button>
       <button class="gem green" data-i="1">
-        <span class="letter">B</span><span class="label">Green</span><span class="note">piano key G</span>
+        <span class="shape">◆</span><span class="letter">B</span><span class="label">Green</span><span class="note">middle · piano key G</span>
       </button>
       <button class="gem blue" data-i="2">
-        <span class="letter">C</span><span class="label">Blue</span><span class="note">piano key E</span>
+        <span class="shape">▲</span><span class="letter">C</span><span class="label">Blue</span><span class="note">high · piano key E</span>
       </button>
     </div>
   </div>
@@ -266,6 +300,40 @@
     <p class="what">Every score here came from the Arduino, through the internet.</p>
     <div class="beat">Score to beat: <b id="toBeat">0</b></div>
     <ol class="scores" id="scores"></ol>
+  </div>
+
+  <!-- About the maker -->
+  <div class="card">
+    <h2>// ABOUT THE MAKER</h2>
+    <p class="maker-hi">Hi! I'm <b>Vivien</b>. I built <i>Play It Back</i> by mixing three things I love:</p>
+    <div class="loves">
+      <div class="love">
+        <div class="icon">🎵</div>
+        <div class="name">Music</div>
+        <div class="how">Every button is a piano key, and C, G and E make a happy chord, so every pattern is a little song.</div>
+      </div>
+      <div class="love">
+        <div class="icon">📚</div>
+        <div class="name">Reading</div>
+        <div class="how">The design looks like the pages of a fantasy book, with gold trim, parchment and candlelight.</div>
+      </div>
+      <div class="love">
+        <div class="icon">💪</div>
+        <div class="name">The Gym</div>
+        <div class="how">It's a workout for your memory: every round adds one more rep. Can you beat your personal record?</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Did you know -->
+  <div class="card">
+    <h2>// DID YOU KNOW?</h2>
+    <p class="what">The psychology behind this game.</p>
+    <div class="facts">
+      <div class="fact"><b>Synesthesia</b> is when one sense triggers another. Some people <b>see colors when they hear music</b>. In a room this size, someone here might have it!</div>
+      <div class="fact"><b>Seeing + hearing = better memory.</b> Each pattern is shown as a color <i>and</i> a note at the same time, so your brain stores it twice. That's why you can often "hum" the pattern back.</div>
+      <div class="fact"><b>Most people can hold only about 4 to 7 things</b> in their head at once. That's why scores usually get stuck around rounds 5 to 8. Try grouping the notes into little tunes to go further!</div>
+    </div>
   </div>
 
   <!-- 1. Live messages -->
@@ -630,7 +698,7 @@ function showRound(n) {
   bannerEl.classList.remove("show");
   drawText(n);
   statusEl.textContent = "ROUND " + n;
-  subEl.textContent = "Watch the pattern... then copy it!";
+  subEl.textContent = "Watch the pattern... then play it back!";
   soundRound();
   // Walk through the code the way the Arduino does
   playCode([[6, 0], [7, 900], [8, 1900], [9, 3600]]);
