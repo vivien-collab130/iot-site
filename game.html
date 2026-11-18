@@ -246,16 +246,16 @@
   <!-- Button key -->
   <div class="card">
     <h2>// THE BUTTON KEY</h2>
-    <p class="what">Each button on the Arduino has its own color and note. Tap one to hear it!</p>
+    <p class="what">Each button is a piano key. Together, C, G and E make a happy chord, so every pattern sounds like a little song. Tap one to hear it!</p>
     <div class="keyrow">
       <button class="gem red" data-i="0">
-        <span class="letter">A</span><span class="label">Red</span><span class="note">low note</span>
+        <span class="letter">A</span><span class="label">Red</span><span class="note">piano key C</span>
       </button>
       <button class="gem green" data-i="1">
-        <span class="letter">B</span><span class="label">Green</span><span class="note">middle note</span>
+        <span class="letter">B</span><span class="label">Green</span><span class="note">piano key G</span>
       </button>
       <button class="gem blue" data-i="2">
-        <span class="letter">C</span><span class="label">Blue</span><span class="note">high note</span>
+        <span class="letter">C</span><span class="label">Blue</span><span class="note">piano key E</span>
       </button>
     </div>
   </div>
@@ -423,14 +423,14 @@ function soundFanfare()  { [523, 659, 784, 1047].forEach((f, i) => playTone(f, 2
 
 /* =====================================================================
    THE BUTTON KEY - tap a button (or press A / B / C) to hear its note
-   Same notes as the Arduino: A = 330, B = 392, C = 523
+   Same piano keys as the Arduino: A = C (262), B = G (392), C = E (659)
    ===================================================================== */
-const NOTES = [330, 392, 523];
+const NOTES = [262, 392, 659];
 const gems = document.querySelectorAll(".gem");
 
 function ringGem(i) {
   wakeSound();
-  playTone(NOTES[i], 350, "triangle", 0.25);
+  playTone(NOTES[i], 600, "triangle", 0.25);   // longer fade = more piano-like
   const gem = gems[i];
   gem.classList.add("lit");
   setTimeout(() => gem.classList.remove("lit"), 300);
@@ -529,7 +529,7 @@ const CODE = [
   { html: '  <span class="fn">sendStatus</span>(<span class="kw">"round:"</span> + length);  <span class="cm">// tell the internet</span>',
     explain: "This line <b>sends the round number through the internet</b> to this screen." },
   { html: '  <span class="fn">flashColor</span>(sequence[s]);   <span class="cm">// show the pattern</span>',
-    explain: "The Arduino <b>flashes each color and plays its note</b> so players can memorize the pattern." },
+    explain: "The Arduino <b>flashes each color and plays its piano key</b> so players can memorize the pattern." },
   { html: '  <span class="kw">int</span> p = <span class="fn">waitForPress</span>(5000); <span class="cm">// players\' turn</span>',
     explain: "Now it's the <b>players' turn</b>. The Arduino waits up to 5 seconds for each button press." },
   { html: '  <span class="kw">if</span> (p != sequence[s]) <span class="fn">gameOver</span>(score);',
