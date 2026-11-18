@@ -5,9 +5,247 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Beat the Machine</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@700&family=Cinzel:wght@600&family=EB+Garamond:ital@0;1&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
 <style>
-    <!-- What I learned -->
+  /* ===================== FANTASY BOOK THEME ===================== */
+  :root {
+    --ink: #3b2a1a;
+    --parchment: #f3e6c4;
+    --parchment-dark: #e2cf9f;
+    --gold: #c9a24a;
+    --gold-bright: #f1cf6b;
+    --burgundy: #7a1f2b;
+    --forest: #2f5d3a;
+    --dot-off: #2a1a0e;
+    --dot-on: #ffb347;
+  }
+  * { box-sizing: border-box; }
+
+  /* Dark leather background with candlelight */
+  body {
+    margin: 0; padding: 20px 16px 40px;
+    font-family: "EB Garamond", Georgia, serif;
+    font-size: 18px;
+    color: var(--parchment);
+    min-height: 100vh;
+    background:
+      radial-gradient(ellipse at center, rgba(0,0,0,0) 40%, rgba(0,0,0,.65) 100%),
+      radial-gradient(circle at 20% 15%, rgba(241,207,107,.14) 0%, transparent 35%),
+      radial-gradient(circle at 80% 70%, rgba(47,93,58,.28) 0%, transparent 40%),
+      linear-gradient(160deg, #2b1a12 0%, #1a110b 100%);
+    background-attachment: fixed;
+  }
+
+  /* Floating gold sparkles */
+  body::before {
+    content: ""; position: fixed; left: 0; right: 0; top: 0; bottom: -240px;
+    pointer-events: none; z-index: 0;
+    background-image:
+      radial-gradient(1.5px 1.5px at 20px 30px,  rgba(241,207,107,.9), transparent),
+      radial-gradient(1px 1px     at 120px 80px, rgba(255,255,255,.8), transparent),
+      radial-gradient(2px 2px     at 200px 160px, rgba(241,207,107,.7), transparent),
+      radial-gradient(1px 1px     at 60px 200px, rgba(255,240,200,.8), transparent),
+      radial-gradient(1.5px 1.5px at 260px 40px, rgba(241,207,107,.6), transparent);
+    background-size: 300px 240px;
+    animation: drift 24s linear infinite, twinkle 4s ease-in-out infinite alternate;
+  }
+  @keyframes drift   { to { transform: translateY(-240px); } }
+  @keyframes twinkle { from { opacity: .35; } to { opacity: .85; } }
+
+  .wrap { max-width: 760px; margin: 0 auto; position: relative; z-index: 1; }
+
+  /* Title like a book cover */
+  h1 {
+    font-family: "Cinzel Decorative", serif;
+    font-size: clamp(1.6rem, 6vw, 2.8rem);
+    text-align: center; margin: 8px 0 6px;
+    color: var(--gold-bright);
+    text-shadow: 0 0 18px rgba(241,207,107,.45), 0 2px 0 #5a3d10;
+    letter-spacing: 1px;
+  }
+  h1::before, h1::after { content: " ✦ "; color: var(--gold); font-size: .6em; vertical-align: middle; }
+  .tagline { text-align: center; font-style: italic; color: var(--parchment-dark); font-size: 1.15rem; margin: 0 0 22px; }
+
+  /* Wood + gold frame around the Arduino, glowing ember lights */
+  .board {
+    background: linear-gradient(145deg, #4a2e1a, #2a180c);
+    border: 3px solid var(--gold);
+    border-radius: 18px; padding: 22px;
+    margin: 0 auto 18px; max-width: 460px;
+    box-shadow: 0 0 0 6px #2a180c, 0 0 0 8px var(--gold), 0 0 40px rgba(241,207,107,.3);
+  }
+  .board-label { font-family: "Cinzel", serif; font-size: .8rem; color: var(--gold-bright); text-align: right; margin-bottom: 10px; }
+  .matrix { display: grid; grid-template-columns: repeat(12, 1fr); gap: 6px; background: #120b06; padding: 14px; border-radius: 10px; }
+  .dot { aspect-ratio: 1; border-radius: 3px; background: var(--dot-off); transition: background .15s, box-shadow .15s; }
+  .dot.on { background: var(--dot-on); box-shadow: 0 0 8px var(--dot-on), 0 0 18px rgba(255,179,71,.6); }
+  .matrix.gold { --dot-on: #fff2a8; }
+  .matrix.over { animation: shake .4s; }
+  @keyframes shake { 0%,100% { transform: translateX(0); } 25% { transform: translateX(-6px); } 75% { transform: translateX(6px); } }
+
+  /* Status text */
+  .status {
+    font-family: "Cinzel", serif; text-align: center;
+    font-size: clamp(1.1rem, 4.5vw, 1.7rem);
+    color: var(--gold-bright); text-shadow: 0 0 12px rgba(241,207,107,.5);
+    margin: 10px 0 6px; line-height: 1.4;
+  }
+  .sub { text-align: center; color: var(--parchment-dark); font-style: italic; font-size: 1.15rem; margin-bottom: 18px; }
+  .banner {
+    display: none; text-align: center;
+    font-family: "Cinzel Decorative", serif; color: var(--gold-bright);
+    font-size: clamp(.9rem, 3.8vw, 1.3rem); margin: 0 0 16px;
+    animation: pulse .8s infinite alternate;
+  }
+  .banner.show { display: block; }
+  @keyframes pulse { from { opacity: .5; transform: scale(.97); } to { opacity: 1; transform: scale(1.03); } }
+
+  /* Each section is a parchment page */
+  .card {
+    background:
+      radial-gradient(ellipse at center, rgba(255,255,255,.35) 0%, transparent 70%),
+      linear-gradient(180deg, #f6ead0 0%, #e9d6a8 100%);
+    color: var(--ink);
+    border: 2px solid var(--gold);
+    border-radius: 6px;
+    padding: 22px 18px;
+    margin: 16px 0;
+    box-shadow: inset 0 0 30px rgba(120,80,30,.35), 0 8px 24px rgba(0,0,0,.5);
+    outline: 1px solid rgba(201,162,74,.5);
+    outline-offset: -8px;
+  }
+  .card h2 { font-family: "Cinzel", serif; font-size: 1.15rem; color: var(--burgundy); letter-spacing: .5px; text-align: center; margin: 0 0 4px; }
+  .card h2::before { content: "❦ "; color: var(--gold); }
+  .card h2::after  { content: " ❦"; color: var(--gold); }
+  .card .what { color: #5b4630; font-style: italic; text-align: center; margin: 0 0 14px; }
+
+  /* Leaderboard */
+  .beat { text-align: center; font-size: 1.15rem; margin-bottom: 12px; color: var(--ink); }
+  .beat b { color: var(--burgundy); font-family: "Cinzel", serif; font-size: 1.7rem; }
+  ol.scores { margin: 0; padding-left: 28px; }
+  ol.scores li { padding: 6px 0; border-bottom: 1px solid rgba(122,31,43,.25); font-size: 1.1rem; color: var(--ink); }
+  ol.scores li:last-child { border-bottom: 0; }
+  ol.scores li b { color: var(--forest); }
+  ol.scores li:nth-child(1) b { color: #a67c00; }
+  ol.scores li:nth-child(2) b { color: #6b6b7a; }
+  ol.scores li:nth-child(3) b { color: #8a4b1f; }
+  ol.scores li:nth-child(1)::after { content: "  🥇"; }
+  ol.scores li:nth-child(2)::after { content: "  🥈"; }
+  ol.scores li:nth-child(3)::after { content: "  🥉"; }
+  ol.scores .when, .empty { color: #7a6448; }
+
+  /* Live messages: looks like an ancient spellbook */
+  .serial {
+    background: #1c130d; border: 1px solid #5a3d10; border-radius: 8px;
+    padding: 12px; min-height: 150px; max-height: 240px; overflow-y: auto;
+    font-family: "JetBrains Mono", monospace; font-size: .85rem; line-height: 1.6;
+  }
+  .serial .row { border-bottom: 1px dashed #3a2a1a; padding: 4px 0; }
+  .serial .t { color: #9c8462; }
+  .serial .raw { color: var(--gold-bright); font-weight: 700; }
+  .serial .plain { color: #f3e6c4; font-family: "EB Garamond", serif; font-size: 1rem; display: block; padding-left: 12px; }
+  .serial .empty { color: #9c8462; }
+
+  /* Code box */
+  .code { background: #1c130d; border: 1px solid #5a3d10; border-radius: 8px; padding: 10px 0; font-family: "JetBrains Mono", monospace; font-size: .82rem; overflow-x: auto; }
+  .code .ln { display: block; padding: 2px 14px; white-space: pre; color: #c9b38a; border-left: 4px solid transparent; transition: background .2s; }
+  .code .ln.hl { background: rgba(241,207,107,.18); border-left-color: var(--gold-bright); color: #fff7e0; }
+  .code .kw { color: #e07a8a; }
+  .code .fn { color: #9fd18b; }
+  .code .cm { color: #8a7458; font-style: italic; }
+  .explain-line {
+    margin-top: 12px; padding: 12px 14px; border-radius: 10px; min-height: 48px;
+    background: rgba(122,31,43,.1); border: 1px solid rgba(122,31,43,.3);
+    color: var(--ink); font-size: 1.1rem;
+  }
+  .explain-line b { color: var(--burgundy); }
+
+  /* Mailbox */
+  .mailbox { display: flex; align-items: center; gap: 16px; }
+  .mailbox .icon { font-size: 2.6rem; transition: transform .2s; }
+  .mailbox .icon.check { animation: bump .6s; }
+  @keyframes bump { 0% { transform: scale(1); } 40% { transform: scale(1.25) rotate(-8deg); } 100% { transform: scale(1); } }
+  .mailbox .info { font-size: 1.1rem; color: var(--ink); }
+  .mailbox .info b { color: var(--burgundy); }
+  .newmail { color: var(--forest); font-weight: bold; }
+
+  /* What I Learned: red, green and gold bookmarks */
+  .learned { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; }
+  .skill { background: rgba(255,255,255,.35); border: 1px solid rgba(201,162,74,.6); border-left: 4px solid var(--burgundy); border-radius: 8px; padding: 12px; color: var(--ink); }
+  .skill .name { font-family: "Cinzel", serif; font-size: 1rem; margin-bottom: 4px; }
+  .skill .used { color: #4d3a26; font-size: 1rem; }
+  .skill:nth-child(3n+1) { border-left-color: var(--burgundy); }
+  .skill:nth-child(3n+2) { border-left-color: var(--forest); }
+  .skill:nth-child(3n)   { border-left-color: var(--gold); }
+  .skill:nth-child(3n+1) .name { color: var(--burgundy); }
+  .skill:nth-child(3n+2) .name { color: var(--forest); }
+  .skill:nth-child(3n)   .name { color: #8a6a1c; }
+
+  /* How it connects */
+  .steps { display: flex; align-items: center; justify-content: center; gap: 10px; flex-wrap: wrap; text-align: center; }
+  .step { background: rgba(255,255,255,.35); border: 1px solid var(--gold); border-radius: 10px; padding: 10px 12px; min-width: 120px; color: var(--ink); }
+  .step .icon { font-size: 1.8rem; }
+  .arrow { color: var(--burgundy); font-size: 1.4rem; }
+  .explain { color: #5b4630; font-style: italic; text-align: center; margin: 12px 0 0; }
+
+  /* Footer */
+  .footer { color: var(--parchment-dark); font-size: .85rem; text-align: center; margin-top: 18px; }
+  .footer a { color: var(--gold-bright); }
+  #problem { color: #ff9a8a; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <h1>Beat the Machine</h1>
+  <p class="tagline">Watch the lights. Copy the pattern. Beat the high score.</p>
+
+  <!-- Pretend Arduino LED matrix -->
+  <div class="board">
+    <div class="board-label">UNO R4 WiFi</div>
+    <div class="matrix" id="matrix"></div>
+  </div>
+
+  <div class="banner" id="banner">🏆 NEW HIGH SCORE! 🏆</div>
+  <div class="status" id="status">Connecting...</div>
+  <div class="sub" id="sub"></div>
+
+  <!-- Leaderboard -->
+  <div class="card">
+    <h2>// TOP SCORES</h2>
+    <p class="what">Every score here came from the Arduino, through the internet.</p>
+    <div class="beat">Score to beat: <b id="toBeat">0</b></div>
+    <ol class="scores" id="scores"></ol>
+  </div>
+
+  <!-- 1. Live messages -->
+  <div class="card">
+    <h2>// 1. LIVE MESSAGES</h2>
+    <p class="what">These are the real messages the Arduino sends over the internet, with what each one means.</p>
+    <div class="serial" id="serial"><div class="empty">Waiting for the first message...</div></div>
+  </div>
+
+  <!-- 2. Code -->
+  <div class="card">
+    <h2>// 2. THE CODE RUNNING RIGHT NOW</h2>
+    <p class="what">This is real code from the Arduino. The glowing line is what's happening this second.</p>
+    <div class="code" id="code"></div>
+    <div class="explain-line" id="explainLine"></div>
+  </div>
+
+  <!-- 3. Polling -->
+  <div class="card">
+    <h2>// 3. CHECKING THE MAILBOX</h2>
+    <p class="what">This screen asks Adafruit IO <i>"anything new?"</i> every 2 seconds. That's called <b>polling</b>.</p>
+    <div class="mailbox">
+      <div class="icon" id="mailIcon">📪</div>
+      <div class="info">
+        Checked <b id="checks">0</b> times<br>
+        Last check: <span id="lastCheck">-</span> &nbsp;<span id="mailNews"></span>
+      </div>
+    </div>
+  </div>
+
+  <!-- What I learned -->
   <div class="card">
     <h2>// WHAT I LEARNED BUILDING THIS</h2>
     <p class="what">Everything I learned in this workshop, and where it shows up in this game.</p>
@@ -43,168 +281,6 @@
       <div class="skill">
         <div class="name">🐞 Debugging</div>
         <div class="used">If something breaks, I check the feed: if the message is there, the bug is in the website. If not, it's in the Arduino.</div>
-      </div>
-    </div>
-  </div>
-  :root {
-    --bg: #0d0b1e;
-    --panel: #17142e;
-    --line: #2c2756;
-    --neon: #39ff14;
-    --pink: #ff3ea5;
-    --cyan: #3ee6ff;
-    --text: #f2f0ff;
-    --muted: #a49fc9;
-    --dot-off: #3a1010;
-    --dot-on: #ff2a2a;
-  }
-  * { box-sizing: border-box; }
-  body {
-    margin: 0; padding: 20px 16px 40px;
-    background: radial-gradient(circle at top, #221a4a 0%, var(--bg) 60%);
-    color: var(--text);
-    font-family: Arial, sans-serif;
-    min-height: 100vh;
-  }
-  .wrap { max-width: 760px; margin: 0 auto; }
-  h1 {
-    font-family: "Press Start 2P", monospace;
-    font-size: clamp(1.1rem, 5vw, 2rem);
-    text-align: center; margin: 8px 0 6px;
-    color: var(--neon);
-    text-shadow: 0 0 12px rgba(57,255,20,.6);
-  }
-  .tagline { text-align: center; color: var(--muted); margin: 0 0 20px; }
-  .mono { font-family: "JetBrains Mono", monospace; }
-
-  /* ----- Pretend Arduino board + LED matrix ----- */
-  .board {
-    background: #0f6b6b; border-radius: 18px; padding: 22px;
-    margin: 0 auto 18px; max-width: 460px;
-    box-shadow: 0 10px 30px rgba(0,0,0,.5), inset 0 0 0 3px #0b5555;
-  }
-  .board-label { font-family: "Press Start 2P", monospace; font-size: .55rem; color: #bfe9e9; text-align: right; margin-bottom: 10px; }
-  .matrix { display: grid; grid-template-columns: repeat(12, 1fr); gap: 6px; background: #111; padding: 14px; border-radius: 10px; }
-  .dot { aspect-ratio: 1; border-radius: 3px; background: var(--dot-off); transition: background .15s, box-shadow .15s; }
-  .dot.on { background: var(--dot-on); box-shadow: 0 0 8px var(--dot-on), 0 0 16px rgba(255,42,42,.5); }
-  .matrix.gold { --dot-on: #ffd23f; }
-  .matrix.over { animation: shake .4s; }
-  @keyframes shake { 0%,100% { transform: translateX(0); } 25% { transform: translateX(-6px); } 75% { transform: translateX(6px); } }
-
-  .status { font-family: "Press Start 2P", monospace; text-align: center; font-size: clamp(.9rem, 4vw, 1.4rem); margin: 10px 0 6px; line-height: 1.5; }
-  .sub { text-align: center; color: var(--muted); font-size: 1.1rem; margin-bottom: 18px; }
-  .banner { display: none; text-align: center; font-family: "Press Start 2P", monospace; color: #ffd23f; font-size: clamp(.8rem, 3.5vw, 1.1rem); margin: 0 0 16px; animation: pulse .8s infinite alternate; }
-  .banner.show { display: block; }
-  @keyframes pulse { from { opacity: .5; transform: scale(.97); } to { opacity: 1; transform: scale(1.03); } }
-
-  /* ----- Cards ----- */
-  .card { background: var(--panel); border: 1px solid var(--line); border-radius: 14px; padding: 18px; margin: 14px 0; }
-  .card h2 { font-family: "JetBrains Mono", monospace; font-size: 1rem; color: var(--pink); margin: 0 0 4px; }
-  .card .what { color: var(--muted); font-size: .95rem; margin: 0 0 14px; }
-
-  /* Serial monitor */
-  .serial {
-    background: #000; border-radius: 8px; padding: 12px; min-height: 150px; max-height: 240px; overflow-y: auto;
-    font-family: "JetBrains Mono", monospace; font-size: .85rem; line-height: 1.6;
-  }
-  .serial .row { border-bottom: 1px dashed #1c1c1c; padding: 4px 0; }
-  .serial .t { color: #666; }
-  .serial .raw { color: var(--neon); font-weight: 700; }
-  .serial .plain { color: #ddd; font-family: Arial, sans-serif; display: block; padding-left: 12px; }
-  .serial .empty { color: #666; }
-
-  /* Code box */
-  .code { background: #0a0918; border-radius: 8px; padding: 10px 0; font-family: "JetBrains Mono", monospace; font-size: .82rem; overflow-x: auto; }
-  .code .ln { display: block; padding: 2px 14px; white-space: pre; color: #8f8ab8; border-left: 4px solid transparent; transition: background .2s; }
-  .code .ln.hl { background: rgba(57,255,20,.14); color: #fff; border-left-color: var(--neon); }
-  .code .kw { color: var(--pink); }
-  .code .fn { color: var(--cyan); }
-  .code .cm { color: #5d5885; }
-  .explain-line {
-    margin-top: 12px; padding: 12px 14px; background: #221d45; border-radius: 10px;
-    font-size: 1.05rem; min-height: 48px;
-  }
-  .explain-line b { color: var(--neon); }
-
-  /* Mailbox / polling */
-  .mailbox { display: flex; align-items: center; gap: 16px; }
-  .mailbox .icon { font-size: 2.6rem; transition: transform .2s; }
-  .mailbox .icon.check { animation: bump .6s; }
-  @keyframes bump { 0% { transform: scale(1); } 40% { transform: scale(1.25) rotate(-8deg); } 100% { transform: scale(1); } }
-  .mailbox .info { font-size: 1rem; }
-  .mailbox .info b { color: var(--cyan); }
-  .newmail { color: var(--neon); font-weight: bold; }
-
-  /* Leaderboard */
-  .beat { text-align: center; font-size: 1.1rem; margin-bottom: 12px; }
-  .beat b { color: var(--neon); font-size: 1.6rem; }
-  ol.scores { margin: 0; padding-left: 28px; }
-  ol.scores li { padding: 6px 0; border-bottom: 1px solid var(--line); font-size: 1.05rem; }
-  ol.scores li:last-child { border-bottom: 0; }
-  ol.scores li b { color: var(--neon); }
-  ol.scores .when { color: var(--muted); font-size: .85rem; }
-  .empty { color: var(--muted); }
-
-  /* How it works */
-  .steps { display: flex; align-items: center; justify-content: center; gap: 10px; flex-wrap: wrap; text-align: center; }
-  .step { background: #221d45; border-radius: 10px; padding: 10px 12px; min-width: 120px; }
-  .step .icon { font-size: 1.8rem; }
-  .arrow { color: var(--neon); font-size: 1.4rem; }
-  .explain { color: var(--muted); text-align: center; margin: 12px 0 0; }
-
-  .footer { color: var(--muted); font-size: .8rem; text-align: center; margin-top: 18px; }
-  .footer a { color: var(--muted); }
-  #problem { color: #ff7a7a; }
-</style>
-</head>
-<body>
-<div class="wrap">
-
-  <h1>BEAT THE MACHINE</h1>
-  <p class="tagline">Watch the lights. Copy the pattern. Beat the high score.</p>
-
-  <!-- Pretend Arduino LED matrix -->
-  <div class="board">
-    <div class="board-label">UNO R4 WiFi</div>
-    <div class="matrix" id="matrix"></div>
-  </div>
-
-  <div class="banner" id="banner">🏆 NEW HIGH SCORE! 🏆</div>
-  <div class="status" id="status">Connecting...</div>
-  <div class="sub" id="sub"></div>
-
-  <!-- Leaderboard -->
-  <div class="card">
-    <h2>// TOP SCORES</h2>
-    <p class="what">Every score here came from the Arduino, through the internet.</p>
-    <div class="beat">Score to beat: <b id="toBeat">0</b></div>
-    <ol class="scores" id="scores"></ol>
-  </div>
-
-  <!-- 1. Serial monitor -->
-  <div class="card">
-    <h2>// 1. LIVE MESSAGES</h2>
-    <p class="what">These are the real messages the Arduino sends over the internet, with what each one means.</p>
-    <div class="serial" id="serial"><div class="empty">Waiting for the first message...</div></div>
-  </div>
-
-  <!-- 2. Code -->
-  <div class="card">
-    <h2>// 2. THE CODE RUNNING RIGHT NOW</h2>
-    <p class="what">This is real code from the Arduino. The green line is what's happening this second.</p>
-    <div class="code" id="code"></div>
-    <div class="explain-line" id="explainLine"></div>
-  </div>
-
-  <!-- 3. Polling -->
-  <div class="card">
-    <h2>// 3. CHECKING THE MAILBOX</h2>
-    <p class="what">This screen asks Adafruit IO <i>"anything new?"</i> every 2 seconds. That's called <b>polling</b>.</p>
-    <div class="mailbox">
-      <div class="icon" id="mailIcon">📪</div>
-      <div class="info">
-        Checked <b id="checks">0</b> times<br>
-        Last check: <span id="lastCheck">-</span> &nbsp;<span id="mailNews"></span>
       </div>
     </div>
   </div>
