@@ -5,9 +5,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Beat the Machine</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@700&family=Cinzel:wght@600&family=EB+Garamond:ital@0;1&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
 <style>
-  /* ===================== FANTASY BOOK THEME ===================== */
+  /* ===================== FANTASY BOOK COLORS ===================== */
   :root {
     --ink: #3b2a1a;
     --parchment: #f3e6c4;
@@ -18,14 +18,15 @@
     --forest: #2f5d3a;
     --dot-off: #2a1a0e;
     --dot-on: #ffb347;
+    --font: "Poppins", Arial, sans-serif;
   }
   * { box-sizing: border-box; }
 
   /* Dark leather background with candlelight */
   body {
     margin: 0; padding: 20px 16px 40px;
-    font-family: "EB Garamond", Georgia, serif;
-    font-size: 18px;
+    font-family: var(--font);
+    font-size: 17px;
     color: var(--parchment);
     min-height: 100vh;
     background:
@@ -54,17 +55,19 @@
 
   .wrap { max-width: 760px; margin: 0 auto; position: relative; z-index: 1; }
 
-  /* Title like a book cover */
+  /* Title */
   h1 {
-    font-family: "Cinzel Decorative", serif;
-    font-size: clamp(1.6rem, 6vw, 2.8rem);
+    font-family: var(--font); font-weight: 800;
+    font-size: clamp(1.8rem, 6.5vw, 3rem);
     text-align: center; margin: 8px 0 6px;
     color: var(--gold-bright);
     text-shadow: 0 0 18px rgba(241,207,107,.45), 0 2px 0 #5a3d10;
     letter-spacing: 1px;
   }
   h1::before, h1::after { content: " ✦ "; color: var(--gold); font-size: .6em; vertical-align: middle; }
-  .tagline { text-align: center; font-style: italic; color: var(--parchment-dark); font-size: 1.15rem; margin: 0 0 22px; }
+  .tagline { text-align: center; color: var(--parchment-dark); font-size: 1.1rem; margin: 0 0 6px; }
+  .soundhint { text-align: center; color: #b9a57c; font-size: .9rem; margin: 0 0 18px; }
+  .soundhint.on { color: #9fd18b; }
 
   /* Wood + gold frame around the Arduino, glowing ember lights */
   .board {
@@ -74,7 +77,7 @@
     margin: 0 auto 18px; max-width: 460px;
     box-shadow: 0 0 0 6px #2a180c, 0 0 0 8px var(--gold), 0 0 40px rgba(241,207,107,.3);
   }
-  .board-label { font-family: "Cinzel", serif; font-size: .8rem; color: var(--gold-bright); text-align: right; margin-bottom: 10px; }
+  .board-label { font-weight: 600; font-size: .8rem; color: var(--gold-bright); text-align: right; margin-bottom: 10px; }
   .matrix { display: grid; grid-template-columns: repeat(12, 1fr); gap: 6px; background: #120b06; padding: 14px; border-radius: 10px; }
   .dot { aspect-ratio: 1; border-radius: 3px; background: var(--dot-off); transition: background .15s, box-shadow .15s; }
   .dot.on { background: var(--dot-on); box-shadow: 0 0 8px var(--dot-on), 0 0 18px rgba(255,179,71,.6); }
@@ -84,16 +87,16 @@
 
   /* Status text */
   .status {
-    font-family: "Cinzel", serif; text-align: center;
-    font-size: clamp(1.1rem, 4.5vw, 1.7rem);
+    font-weight: 800; text-align: center;
+    font-size: clamp(1.2rem, 4.8vw, 1.8rem);
     color: var(--gold-bright); text-shadow: 0 0 12px rgba(241,207,107,.5);
-    margin: 10px 0 6px; line-height: 1.4;
+    margin: 10px 0 6px; line-height: 1.3;
   }
-  .sub { text-align: center; color: var(--parchment-dark); font-style: italic; font-size: 1.15rem; margin-bottom: 18px; }
+  .sub { text-align: center; color: var(--parchment-dark); font-size: 1.1rem; margin-bottom: 18px; }
   .banner {
     display: none; text-align: center;
-    font-family: "Cinzel Decorative", serif; color: var(--gold-bright);
-    font-size: clamp(.9rem, 3.8vw, 1.3rem); margin: 0 0 16px;
+    font-weight: 800; color: var(--gold-bright);
+    font-size: clamp(1rem, 4vw, 1.4rem); margin: 0 0 16px;
     animation: pulse .8s infinite alternate;
   }
   .banner.show { display: block; }
@@ -112,17 +115,44 @@
     box-shadow: inset 0 0 30px rgba(120,80,30,.35), 0 8px 24px rgba(0,0,0,.5);
     outline: 1px solid rgba(201,162,74,.5);
     outline-offset: -8px;
+    transition: transform .2s, box-shadow .2s;
   }
-  .card h2 { font-family: "Cinzel", serif; font-size: 1.15rem; color: var(--burgundy); letter-spacing: .5px; text-align: center; margin: 0 0 4px; }
+  .card:hover { transform: translateY(-3px); box-shadow: inset 0 0 30px rgba(120,80,30,.35), 0 14px 30px rgba(0,0,0,.55); }
+  .card h2 { font-weight: 800; font-size: 1.1rem; color: var(--burgundy); letter-spacing: .5px; text-align: center; margin: 0 0 4px; }
   .card h2::before { content: "❦ "; color: var(--gold); }
   .card h2::after  { content: " ❦"; color: var(--gold); }
-  .card .what { color: #5b4630; font-style: italic; text-align: center; margin: 0 0 14px; }
+  .card .what { color: #5b4630; text-align: center; margin: 0 0 14px; font-size: .98rem; }
+
+  /* Button key: glowing gems */
+  .keyrow { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; }
+  .gem {
+    width: 120px; padding: 14px 8px 12px;
+    border: 2px solid var(--gold); border-radius: 16px;
+    cursor: pointer; color: #fff; text-align: center;
+    font-family: var(--font);
+    background:
+      radial-gradient(circle at 30% 25%, rgba(255,255,255,.55), transparent 40%),
+      var(--gem);
+    box-shadow: 0 5px 0 rgba(0,0,0,.35), inset 0 -6px 12px rgba(0,0,0,.25);
+    transition: transform .1s, box-shadow .2s;
+  }
+  .gem .letter { font-size: 2.2rem; font-weight: 800; display: block; line-height: 1.1; text-shadow: 0 2px 4px rgba(0,0,0,.4); }
+  .gem .label  { font-size: 1rem; font-weight: 600; display: block; }
+  .gem .note   { font-size: .85rem; display: block; opacity: .9; }
+  .gem.red   { --gem: #b3122e; }
+  .gem.green { --gem: #1f8a4c; }
+  .gem.blue  { --gem: #1f4fb3; }
+  .gem:hover { transform: translateY(-2px); }
+  .gem.lit, .gem:active {
+    transform: translateY(3px) scale(1.06);
+    box-shadow: 0 0 22px var(--gem), 0 0 46px var(--gem), inset 0 -6px 12px rgba(0,0,0,.25);
+  }
 
   /* Leaderboard */
-  .beat { text-align: center; font-size: 1.15rem; margin-bottom: 12px; color: var(--ink); }
-  .beat b { color: var(--burgundy); font-family: "Cinzel", serif; font-size: 1.7rem; }
+  .beat { text-align: center; font-size: 1.1rem; margin-bottom: 12px; color: var(--ink); }
+  .beat b { color: var(--burgundy); font-weight: 800; font-size: 1.7rem; }
   ol.scores { margin: 0; padding-left: 28px; }
-  ol.scores li { padding: 6px 0; border-bottom: 1px solid rgba(122,31,43,.25); font-size: 1.1rem; color: var(--ink); }
+  ol.scores li { padding: 6px 0; border-bottom: 1px solid rgba(122,31,43,.25); font-size: 1.05rem; color: var(--ink); }
   ol.scores li:last-child { border-bottom: 0; }
   ol.scores li b { color: var(--forest); }
   ol.scores li:nth-child(1) b { color: #a67c00; }
@@ -133,7 +163,7 @@
   ol.scores li:nth-child(3)::after { content: "  🥉"; }
   ol.scores .when, .empty { color: #7a6448; }
 
-  /* Live messages: looks like an ancient spellbook */
+  /* Live messages */
   .serial {
     background: #1c130d; border: 1px solid #5a3d10; border-radius: 8px;
     padding: 12px; min-height: 150px; max-height: 240px; overflow-y: auto;
@@ -142,12 +172,14 @@
   .serial .row { border-bottom: 1px dashed #3a2a1a; padding: 4px 0; }
   .serial .t { color: #9c8462; }
   .serial .raw { color: var(--gold-bright); font-weight: 700; }
-  .serial .plain { color: #f3e6c4; font-family: "EB Garamond", serif; font-size: 1rem; display: block; padding-left: 12px; }
+  .serial .plain { color: #f3e6c4; font-family: var(--font); font-size: .95rem; display: block; padding-left: 12px; }
   .serial .empty { color: #9c8462; }
 
   /* Code box */
   .code { background: #1c130d; border: 1px solid #5a3d10; border-radius: 8px; padding: 10px 0; font-family: "JetBrains Mono", monospace; font-size: .82rem; overflow-x: auto; }
   .code .ln { display: block; padding: 2px 14px; white-space: pre; color: #c9b38a; border-left: 4px solid transparent; transition: background .2s; }
+  .code .ln.clickable { cursor: pointer; }
+  .code .ln.clickable:hover { background: rgba(241,207,107,.08); }
   .code .ln.hl { background: rgba(241,207,107,.18); border-left-color: var(--gold-bright); color: #fff7e0; }
   .code .kw { color: #e07a8a; }
   .code .fn { color: #9fd18b; }
@@ -155,7 +187,7 @@
   .explain-line {
     margin-top: 12px; padding: 12px 14px; border-radius: 10px; min-height: 48px;
     background: rgba(122,31,43,.1); border: 1px solid rgba(122,31,43,.3);
-    color: var(--ink); font-size: 1.1rem;
+    color: var(--ink); font-size: 1.02rem;
   }
   .explain-line b { color: var(--burgundy); }
 
@@ -164,15 +196,16 @@
   .mailbox .icon { font-size: 2.6rem; transition: transform .2s; }
   .mailbox .icon.check { animation: bump .6s; }
   @keyframes bump { 0% { transform: scale(1); } 40% { transform: scale(1.25) rotate(-8deg); } 100% { transform: scale(1); } }
-  .mailbox .info { font-size: 1.1rem; color: var(--ink); }
+  .mailbox .info { font-size: 1.05rem; color: var(--ink); }
   .mailbox .info b { color: var(--burgundy); }
   .newmail { color: var(--forest); font-weight: bold; }
 
-  /* What I Learned: red, green and gold bookmarks */
+  /* What I Learned */
   .learned { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; }
-  .skill { background: rgba(255,255,255,.35); border: 1px solid rgba(201,162,74,.6); border-left: 4px solid var(--burgundy); border-radius: 8px; padding: 12px; color: var(--ink); }
-  .skill .name { font-family: "Cinzel", serif; font-size: 1rem; margin-bottom: 4px; }
-  .skill .used { color: #4d3a26; font-size: 1rem; }
+  .skill { background: rgba(255,255,255,.35); border: 1px solid rgba(201,162,74,.6); border-left: 4px solid var(--burgundy); border-radius: 8px; padding: 12px; color: var(--ink); transition: transform .2s, background .2s; }
+  .skill:hover { transform: translateY(-3px); background: rgba(255,255,255,.55); }
+  .skill .name { font-weight: 800; font-size: 1rem; margin-bottom: 4px; }
+  .skill .used { color: #4d3a26; font-size: .95rem; }
   .skill:nth-child(3n+1) { border-left-color: var(--burgundy); }
   .skill:nth-child(3n+2) { border-left-color: var(--forest); }
   .skill:nth-child(3n)   { border-left-color: var(--gold); }
@@ -185,7 +218,7 @@
   .step { background: rgba(255,255,255,.35); border: 1px solid var(--gold); border-radius: 10px; padding: 10px 12px; min-width: 120px; color: var(--ink); }
   .step .icon { font-size: 1.8rem; }
   .arrow { color: var(--burgundy); font-size: 1.4rem; }
-  .explain { color: #5b4630; font-style: italic; text-align: center; margin: 12px 0 0; }
+  .explain { color: #5b4630; text-align: center; margin: 12px 0 0; }
 
   /* Footer */
   .footer { color: var(--parchment-dark); font-size: .85rem; text-align: center; margin-top: 18px; }
@@ -198,6 +231,7 @@
 
   <h1>Beat the Machine</h1>
   <p class="tagline">Watch the lights. Copy the pattern. Beat the high score.</p>
+  <p class="soundhint" id="soundHint">🔊 Tap anywhere once to wake the sound.</p>
 
   <!-- Pretend Arduino LED matrix -->
   <div class="board">
@@ -208,6 +242,23 @@
   <div class="banner" id="banner">🏆 NEW HIGH SCORE! 🏆</div>
   <div class="status" id="status">Connecting...</div>
   <div class="sub" id="sub"></div>
+
+  <!-- Button key -->
+  <div class="card">
+    <h2>// THE BUTTON KEY</h2>
+    <p class="what">Each button on the Arduino has its own color and note. Tap one to hear it!</p>
+    <div class="keyrow">
+      <button class="gem red" data-i="0">
+        <span class="letter">A</span><span class="label">Red</span><span class="note">low note</span>
+      </button>
+      <button class="gem green" data-i="1">
+        <span class="letter">B</span><span class="label">Green</span><span class="note">middle note</span>
+      </button>
+      <button class="gem blue" data-i="2">
+        <span class="letter">C</span><span class="label">Blue</span><span class="note">high note</span>
+      </button>
+    </div>
+  </div>
 
   <!-- Leaderboard -->
   <div class="card">
@@ -227,7 +278,7 @@
   <!-- 2. Code -->
   <div class="card">
     <h2>// 2. THE CODE RUNNING RIGHT NOW</h2>
-    <p class="what">This is real code from the Arduino. The glowing line is what's happening this second.</p>
+    <p class="what">This is real code from the Arduino. The glowing line is what's happening this second. <b>Tap any line</b> to learn what it does.</p>
     <div class="code" id="code"></div>
     <div class="explain-line" id="explainLine"></div>
   </div>
@@ -335,6 +386,66 @@ document.getElementById("whoami").textContent = IO_USERNAME;
 const BASE = `https://io.adafruit.com/api/v2/${IO_USERNAME}/feeds/`;
 
 /* =====================================================================
+   SOUND - browsers only allow sound after the page is tapped once
+   ===================================================================== */
+let audioCtx = null;
+const soundHint = document.getElementById("soundHint");
+
+function wakeSound() {
+  if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  if (audioCtx.state === "suspended") audioCtx.resume();
+  soundHint.textContent = "🔊 Sound is on!";
+  soundHint.classList.add("on");
+}
+document.addEventListener("pointerdown", wakeSound);
+document.addEventListener("keydown", wakeSound);
+
+// Plays one note. type can be "triangle", "sine", "square" or "sawtooth".
+function playTone(freq, ms, type = "triangle", vol = 0.2, delayMs = 0) {
+  if (!audioCtx) return;
+  const t = audioCtx.currentTime + delayMs / 1000;
+  const osc = audioCtx.createOscillator();
+  const gain = audioCtx.createGain();
+  osc.type = type;
+  osc.frequency.value = freq;
+  gain.gain.setValueAtTime(0.0001, t);
+  gain.gain.exponentialRampToValueAtTime(vol, t + 0.02);
+  gain.gain.exponentialRampToValueAtTime(0.0001, t + ms / 1000);
+  osc.connect(gain);
+  gain.connect(audioCtx.destination);
+  osc.start(t);
+  osc.stop(t + ms / 1000 + 0.05);
+}
+
+function soundRound()    { playTone(880, 120, "sine", 0.12); }
+function soundGameOver() { playTone(220, 300, "sawtooth", 0.1); playTone(150, 600, "sawtooth", 0.1, 320); }
+function soundFanfare()  { [523, 659, 784, 1047].forEach((f, i) => playTone(f, 220, "triangle", 0.18, i * 170)); }
+
+/* =====================================================================
+   THE BUTTON KEY - tap a button (or press A / B / C) to hear its note
+   Same notes as the Arduino: A = 330, B = 392, C = 523
+   ===================================================================== */
+const NOTES = [330, 392, 523];
+const gems = document.querySelectorAll(".gem");
+
+function ringGem(i) {
+  wakeSound();
+  playTone(NOTES[i], 350, "triangle", 0.25);
+  const gem = gems[i];
+  gem.classList.add("lit");
+  setTimeout(() => gem.classList.remove("lit"), 300);
+}
+gems.forEach((gem) => {
+  gem.addEventListener("click", () => ringGem(Number(gem.dataset.i)));
+});
+document.addEventListener("keydown", (e) => {
+  const k = e.key.toUpperCase();
+  if (k === "A") ringGem(0);
+  if (k === "B") ringGem(1);
+  if (k === "C") ringGem(2);
+});
+
+/* =====================================================================
    PRETEND LED MATRIX - 12 x 8 dots, same font style as the Arduino
    ===================================================================== */
 const COLS = 12, ROWS = 8;
@@ -403,14 +514,16 @@ function logMessage(raw, plain) {
    Real lines from the Arduino sketch, plus a plain-English explanation.
    ===================================================================== */
 const CODE = [
-  { html: '<span class="kw">void</span> <span class="fn">loop</span>() {', explain: "" },
+  { html: '<span class="kw">void</span> <span class="fn">loop</span>() {',
+    explain: "<b>loop()</b> runs over and over forever. It's the heartbeat of every Arduino program." },
   { html: '  <span class="fn">waitForPress</span>(0);           <span class="cm">// wait for a player</span>',
     explain: "The Arduino is <b>waiting</b> for someone to press a button to start a game." },
   { html: '  <span class="fn">playGame</span>();                <span class="cm">// start!</span>',
     explain: "A button was pressed, so the game starts!" },
   { html: '}', explain: "" },
   { html: '', explain: "" },
-  { html: '<span class="kw">void</span> <span class="fn">playGame</span>() {', explain: "" },
+  { html: '<span class="kw">void</span> <span class="fn">playGame</span>() {',
+    explain: "<b>playGame()</b> is a function: a named set of steps the Arduino can run whenever it needs to." },
   { html: '  sequence[length] = <span class="fn">random</span>(3);  <span class="cm">// pick a color</span>',
     explain: "The Arduino <b>picks a random color</b> (0 = red, 1 = green, 2 = blue) and adds it to the pattern." },
   { html: '  <span class="fn">sendStatus</span>(<span class="kw">"round:"</span> + length);  <span class="cm">// tell the internet</span>',
@@ -423,7 +536,8 @@ const CODE = [
     explain: "An <b>if statement</b> checks: did they press the right button? If not, it's game over!" },
   { html: '}', explain: "" },
   { html: '', explain: "" },
-  { html: '<span class="kw">void</span> <span class="fn">gameOver</span>(<span class="kw">int</span> score) {', explain: "" },
+  { html: '<span class="kw">void</span> <span class="fn">gameOver</span>(<span class="kw">int</span> score) {',
+    explain: "<b>gameOver()</b> runs when a player makes a mistake. It takes the <b>score</b> as its input." },
   { html: '  <span class="fn">sendStatus</span>(<span class="kw">"over:"</span> + score);  <span class="cm">// send the score</span>',
     explain: "This line <b>sends the final score through the internet</b> to the leaderboard." },
   { html: '}', explain: "" }
@@ -431,10 +545,14 @@ const CODE = [
 
 const codeEl = document.getElementById("code");
 const explainEl = document.getElementById("explainLine");
-CODE.forEach((line) => {
+CODE.forEach((line, i) => {
   const span = document.createElement("span");
   span.className = "ln";
   span.innerHTML = line.html || " ";
+  if (line.explain) {
+    span.classList.add("clickable");
+    span.addEventListener("click", () => { playCode([]); highlight(i); });
+  }
   codeEl.appendChild(span);
 });
 const codeLines = codeEl.querySelectorAll(".ln");
@@ -513,6 +631,7 @@ function showRound(n) {
   drawText(n);
   statusEl.textContent = "ROUND " + n;
   subEl.textContent = "Watch the pattern... then copy it!";
+  soundRound();
   // Walk through the code the way the Arduino does
   playCode([[6, 0], [7, 900], [8, 1900], [9, 3600]]);
 }
@@ -536,6 +655,9 @@ function showGameOver(score) {
   statusEl.textContent = "GAME OVER";
   subEl.textContent = "Your score: " + score + (score === 1 ? " round" : " rounds");
   playCode([[10, 0], [14, 1400]]);
+
+  soundGameOver();
+  if (isBest) setTimeout(soundFanfare, 1100);
 
   backTimer = setTimeout(showWaiting, BACK_TO_GO_MS);
 }
