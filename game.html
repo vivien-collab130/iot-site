@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Beat the Machine</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0d0b1e;
+    --panel: #17142e;
+    --neon: #39ff14;
+    --pink: #ff3ea5;
+    --text: #f2f0ff;
+    --muted: #a49fc9;
+    --dot-off: #3a1010;
+    --dot-on: #ff2a2a;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; padding: 20px 16px 40px;
+    background: radial-gradient(circle at top, #221a4a 0%, var(--bg) 60%);
+    color: var(--text);
+    font-family: Arial, sans-serif;
+    min-height: 100vh;
+  }
+  .wrap { max-width: 720px; margin: 0 auto; }
+  h1 {
+    font-family: "Press Start 2P", monospace;
+    font-size: clamp(1.1rem, 5vw, 2rem);
+    text-align: center; margin: 8px 0 6px;
+    color: var(--neon);
+    text-shadow: 0 0 12px rgba(57,255,20,.6);
+  }
+  .tagline { text-align: center; color: var(--muted); margin: 0 0 20px; }
+
+  /* ----- The pretend Arduino board + LED matrix ----- */
+  .board {
+    background: #0f6b6b;
+    border-radius: 18px;
+    padding: 22px;
+    margin: 0 auto 18px;
+    max-width: 460px;
+    box-shadow: 0 10px 30px rgba(0,0,0,.5), inset 0 0 0 3px #0b5555;
+  }
+  .board-label {
+    font-family: "Press Start 2P", monospace;
+    font-size: .55rem; color: #bfe9e9; text-align: right; margin-bottom: 10px;
+  }
+  .matrix {
+    display: grid;
+    grid-template-columns: repeat(12, 1fr);
+    gap: 6px;
+    background: #111;
+    padding: 14px;
+    border-radius: 10px;
+  }
+  .dot {
+    aspect-ratio: 1;
+    border-radius: 3px;
+    background: var(--dot-off);
+    transition: background .15s, box-shadow .15s;
+  }
+  .dot.on {
+    background: var(--dot-on);
+    box-shadow: 0 0 8px var(--dot-on), 0 0 16px rgba(255,42,42,.5);
+  }
+  .matrix.gold { --dot-on: #ffd23f; }
+  .matrix.over { animation: shake .4s; }
+  @keyframes shake {
+    0%,100% { transform: translateX(0); }
+    25% { transform: translateX(-6px); }
+    75% { transform: translateX(6px); }
+  }
+
+  /* ----- Status text ----- */
+  .status {
+    font-family: "Press Start 2P", monospace;
+    text-align: center;
+    font-size: clamp(.9rem, 4vw, 1.4rem);
+    margin: 10px 0 6px;
+    line-height: 1.5;
+  }
+  .sub { text-align: center; color: var(--muted); font-size: 1.1rem; margin-bottom: 18px; }
+  .banner {
+    display: none;
+    text-align: center;
+    font-family: "Press Start 2P", monospace;
+    color: #ffd23f;
+    font-size: clamp(.8rem, 3.5vw, 1.1rem);
+    margin: 0 0 16px;
+    animation: pulse .8s infinite alternate;
+  }
+  .banner.show { display: block; }
+  @keyframes pulse { from { opacity: .5; transform: scale(.97); } to { opacity: 1; transform: scale(1.03); } }
+
+  /* ----- Cards ----- */
+  .card {
+    background: var(--panel);
+    border: 1px solid #2c2756;
+    border-radius: 14px;
+    padding: 18px;
+    margin: 14px 0;
+  }
+  .card h2 {
+    font-family: "Press Start 2P", monospace;
+    font-size: .8rem; color: var(--pink); margin: 0 0 14px;
+  }
+  .beat {
+    text-align: center; font-size: 1.1rem; margin-bottom: 12px;
+  }
+  .beat b { color: var(--neon); font-size: 1.6rem; }
+  ol.scores { margin: 0; padding-left: 28px; }
+  ol.scores li { padding: 6px 0; border-bottom: 1px solid #2c2756; font-size: 1.05rem; }
+  ol.scores li:last-child { border-bottom: 0; }
+  ol.scores li b { color: var(--neon); }
+  ol.scores .when { color: var(--muted); font-size: .85rem; }
+  .empty { color: var(--muted); }
+
+  .steps { display: flex; align-items: center; justify-content: center; gap: 10px; flex-wrap: wrap; text-align: center; }
+  .step { background: #221d45; border-radius: 10px; padding: 10px 12px; min-width: 120px; }
+  .step .icon { font-size: 1.8rem; }
+  .arrow { color: var(--neon); font-size: 1.4rem; }
+  .explain { color: var(--muted); text-align: center; margin: 12px 0 0; }
+
+  .footer { color: var(--muted); font-size: .8rem; text-align: center; margin-top: 18px; }
+  .footer a { color: var(--muted); }
+  #problem { color: #ff7a7a; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <h1>BEAT THE MACHINE</h1>
+  <p class="tagline">Watch the lights. Copy the pattern. Beat the high score.</p>
+
+  <!-- Pretend Arduino LED matrix -->
+  <div class="board">
+    <div class="board-label">UNO R4 WiFi</div>
+    <div class="matrix" id="matrix"></div>
+  </div>
+
+  <div class="banner" id="banner">🏆 NEW HIGH SCORE! 🏆</div>
+  <div class="status" id="status">Connecting...</div>
+  <div class="sub" id="sub"></div>
+
+  <!-- Leaderboard -->
+  <div class="card">
+    <h2>🏆 TOP SCORES</h2>
+    <div class="beat">Score to beat: <b id="toBeat">0</b></div>
+    <ol class="scores" id="scores"></ol>
+  </div>
+
+  <!-- How it works -->
+  <div class="card">
+    <h2>📡 HOW IT WORKS</h2>
+    <div class="steps">
+      <div class="step"><div class="icon">🤖</div>Arduino</div>
+      <div class="arrow">→</div>
+      <div class="step"><div class="icon">☁️</div>Adafruit IO</div>
+      <div class="arrow">→</div>
+      <div class="step"><div class="icon">💻</div>This screen</div>
+    </div>
+    <p class="explain">Every round and every score you see here traveled from the Arduino, through the internet, to this screen. It's the same way smart doorbells and fitness trackers work!</p>
+  </div>
+
+  <div class="footer">
+    Adafruit IO user: <span id="whoami">?</span> &nbsp;|&nbsp;
+    <a href="#" id="changeKey">change key</a> &nbsp;|&nbsp;
+    <a href="#" id="clearScores">clear scores</a>
+    <div id="problem"></div>
+  </div>
+
+</div>
+
+<script>
+/* ---------- SETTINGS ---------- */
+const IO_USERNAME = "eagle_vivien";   // your Adafruit IO username
+const GAME_FEED   = "game";           // the feed the Arduino sends to
+const POLL_MS     = 2000;             // check every 2 seconds. Keep >= 2000.
+const BACK_TO_GO_MS = 10000;          // after GAME OVER, go back to GO after this long
+
+/* ---------- KEY (stays in this browser only, never in this file) ---------- */
+function getKey() {
+  let key = null;
+  try { key = localStorage.getItem("aio_key"); } catch (e) {}
+  if (!key) {
+    key = prompt("Paste your Adafruit IO key (starts with aio_). It stays in this browser only.");
+    if (key) { try { localStorage.setItem("aio_key", key.trim()); } catch (e) {} }
+  }
+  return key ? key.trim() : "";
+}
+document.getElementById("changeKey").onclick = (e) => {
+  e.preventDefault();
+  try { localStorage.removeItem("aio_key"); } catch (e2) {}
+  location.reload();
+};
+
+const IO_KEY = getKey();
+document.getElementById("whoami").textContent = IO_USERNAME;
+const BASE = `https://io.adafruit.com/api/v2/${IO_USERNAME}/feeds/`;
+
+/* =====================================================================
+   PRETEND LED MATRIX - 12 x 8 dots, same font style as the Arduino
+   ===================================================================== */
+const COLS = 12, ROWS = 8;
+const matrixEl = document.getElementById("matrix");
+const dots = [];
+for (let i = 0; i < COLS * ROWS; i++) {
+  const d = document.createElement("div");
+  d.className = "dot";
+  matrixEl.appendChild(d);
+  dots.push(d);
+}
+
+// 5x7 letters, like the Arduino's Font_5x7
+const GLYPHS = {
+  "0": [" ### ","#   #","#  ##","# # #","##  #","#   #"," ### "],
+  "1": ["  #  "," ##  ","  #  ","  #  ","  #  ","  #  "," ### "],
+  "2": [" ### ","#   #","    #","   # ","  #  "," #   ","#####"],
+  "3": ["#####","   # ","  #  ","   # ","    #","#   #"," ### "],
+  "4": ["   # ","  ## "," # # ","#  # ","#####","   # ","   # "],
+  "5": ["#####","#    ","#### ","    #","    #","#   #"," ### "],
+  "6": ["  ## "," #   ","#    ","#### ","#   #","#   #"," ### "],
+  "7": ["#####","    #","   # ","  #  "," #   "," #   "," #   "],
+  "8": [" ### ","#   #","#   #"," ### ","#   #","#   #"," ### "],
+  "9": [" ### ","#   #","#   #"," ####","    #","   # "," ##  "],
+  "G": [" ### ","#   #","#    ","# ###","#   #","#   #"," ####"],
+  "O": [" ### ","#   #","#   #","#   #","#   #","#   #"," ### "]
+};
+
+// Draws up to 2 characters, starting at the left, just like the Arduino.
+function drawText(text) {
+  dots.forEach(d => d.classList.remove("on"));
+  let x = 0;
+  for (const ch of String(text)) {
+    const g = GLYPHS[ch];
+    if (g) {
+      for (let r = 0; r < 7; r++) {
+        for (let c = 0; c < 5; c++) {
+          const col = x + c, row = r + 1;
+          if (g[r][c] === "#" && col < COLS) dots[row * COLS + col].classList.add("on");
+        }
+      }
+    }
+    x += 6;
+  }
+}
+
+/* =====================================================================
+   LEADERBOARD - saved in THIS browser
+   ===================================================================== */
+function loadScores() {
+  try { return JSON.parse(localStorage.getItem("btm_scores")) || []; } catch (e) { return []; }
+}
+function saveScores(list) {
+  try { localStorage.setItem("btm_scores", JSON.stringify(list)); } catch (e) {}
+}
+function bestScore() {
+  return loadScores().reduce((m, s) => Math.max(m, s.score), 0);
+}
+function renderScores() {
+  const list = loadScores().slice().sort((a, b) => b.score - a.score || a.t - b.t).slice(0, 5);
+  const ol = document.getElementById("scores");
+  ol.innerHTML = "";
+  if (list.length === 0) {
+    ol.innerHTML = '<li class="empty">No games yet. Be the first!</li>';
+  } else {
+    list.forEach((s) => {
+      const li = document.createElement("li");
+      const when = new Date(s.t).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
+      li.innerHTML = `<b>${s.score}</b> rounds &nbsp;<span class="when">at ${when}</span>`;
+      ol.appendChild(li);
+    });
+  }
+  document.getElementById("toBeat").textContent = bestScore();
+}
+document.getElementById("clearScores").onclick = (e) => {
+  e.preventDefault();
+  if (confirm("Clear all scores? This can't be undone.")) {
+    saveScores([]);
+    renderScores();
+    showWaiting();
+  }
+};
+
+/* =====================================================================
+   SCREENS
+   ===================================================================== */
+const statusEl = document.getElementById("status");
+const subEl    = document.getElementById("sub");
+const bannerEl = document.getElementById("banner");
+let backTimer = null;
+
+function showWaiting() {
+  clearTimeout(backTimer);
+  matrixEl.classList.remove("gold", "over");
+  bannerEl.classList.remove("show");
+  drawText("GO");
+  statusEl.textContent = "Press any button to play!";
+  subEl.textContent = "Score to beat: " + bestScore();
+}
+
+function showRound(n) {
+  clearTimeout(backTimer);
+  matrixEl.classList.remove("gold", "over");
+  bannerEl.classList.remove("show");
+  drawText(n);
+  statusEl.textContent = "ROUND " + n;
+  subEl.textContent = "Watch the pattern... then copy it!";
+}
+
+function showGameOver(score) {
+  clearTimeout(backTimer);
+  const isBest = score > 0 && score > bestScore();
+
+  const list = loadScores();
+  list.push({ score: score, t: Date.now() });
+  saveScores(list);
+  renderScores();
+
+  drawText(score);
+  matrixEl.classList.remove("over");
+  void matrixEl.offsetWidth;            // restart the shake animation
+  matrixEl.classList.add("over");
+  matrixEl.classList.toggle("gold", isBest);
+  bannerEl.classList.toggle("show", isBest);
+
+  statusEl.textContent = "GAME OVER";
+  subEl.textContent = "Your score: " + score + (score === 1 ? " round" : " rounds");
+
+  backTimer = setTimeout(showWaiting, BACK_TO_GO_MS);
+}
+
+/* =====================================================================
+   CHECK THE GAME FEED every POLL_MS
+   ===================================================================== */
+let lastSeenId = null;
+const problemEl = document.getElementById("problem");
+
+async function checkGame() {
+  try {
+    const res = await fetch(BASE + GAME_FEED + "/data/last", {
+      headers: { "X-AIO-Key": IO_KEY }
+    });
+    if (res.status === 404) { problemEl.textContent = "Feed 'game' not found. Did you create it on io.adafruit.com?"; return; }
+    if (res.status === 401) { problemEl.textContent = "Wrong username or key. Click 'change key'."; return; }
+    if (!res.ok) { problemEl.textContent = "Adafruit IO replied " + res.status; return; }
+
+    const data = await res.json();
+    problemEl.textContent = "";
+
+    if (data.id !== lastSeenId) {
+      const firstLoad = (lastSeenId === null);
+      lastSeenId = data.id;
+      const value = String(data.value);
+
+      if (firstLoad) {               // don't replay an old game when the page opens
+        showWaiting();
+        return;
+      }
+      if (value.startsWith("round:")) {
+        showRound(parseInt(value.slice(6)) || 0);
+      } else if (value.startsWith("over:")) {
+        showGameOver(parseInt(value.slice(5)) || 0);
+      }
+    }
+  } catch (err) {
+    problemEl.textContent = "Could not reach Adafruit IO: " + err.message;
+  }
+}
+
+/* ---------- start ---------- */
+renderScores();
+showWaiting();
+checkGame();
+setInterval(checkGame, POLL_MS);
+</script>
+</body>
+</html>
