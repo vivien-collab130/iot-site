@@ -5,13 +5,15 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Beat the Machine</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
 <style>
   :root {
     --bg: #0d0b1e;
     --panel: #17142e;
+    --line: #2c2756;
     --neon: #39ff14;
     --pink: #ff3ea5;
+    --cyan: #3ee6ff;
     --text: #f2f0ff;
     --muted: #a49fc9;
     --dot-off: #3a1010;
@@ -25,7 +27,7 @@
     font-family: Arial, sans-serif;
     min-height: 100vh;
   }
-  .wrap { max-width: 720px; margin: 0 auto; }
+  .wrap { max-width: 760px; margin: 0 auto; }
   h1 {
     font-family: "Press Start 2P", monospace;
     font-size: clamp(1.1rem, 5vw, 2rem);
@@ -34,90 +36,77 @@
     text-shadow: 0 0 12px rgba(57,255,20,.6);
   }
   .tagline { text-align: center; color: var(--muted); margin: 0 0 20px; }
+  .mono { font-family: "JetBrains Mono", monospace; }
 
-  /* ----- The pretend Arduino board + LED matrix ----- */
+  /* ----- Pretend Arduino board + LED matrix ----- */
   .board {
-    background: #0f6b6b;
-    border-radius: 18px;
-    padding: 22px;
-    margin: 0 auto 18px;
-    max-width: 460px;
+    background: #0f6b6b; border-radius: 18px; padding: 22px;
+    margin: 0 auto 18px; max-width: 460px;
     box-shadow: 0 10px 30px rgba(0,0,0,.5), inset 0 0 0 3px #0b5555;
   }
-  .board-label {
-    font-family: "Press Start 2P", monospace;
-    font-size: .55rem; color: #bfe9e9; text-align: right; margin-bottom: 10px;
-  }
-  .matrix {
-    display: grid;
-    grid-template-columns: repeat(12, 1fr);
-    gap: 6px;
-    background: #111;
-    padding: 14px;
-    border-radius: 10px;
-  }
-  .dot {
-    aspect-ratio: 1;
-    border-radius: 3px;
-    background: var(--dot-off);
-    transition: background .15s, box-shadow .15s;
-  }
-  .dot.on {
-    background: var(--dot-on);
-    box-shadow: 0 0 8px var(--dot-on), 0 0 16px rgba(255,42,42,.5);
-  }
+  .board-label { font-family: "Press Start 2P", monospace; font-size: .55rem; color: #bfe9e9; text-align: right; margin-bottom: 10px; }
+  .matrix { display: grid; grid-template-columns: repeat(12, 1fr); gap: 6px; background: #111; padding: 14px; border-radius: 10px; }
+  .dot { aspect-ratio: 1; border-radius: 3px; background: var(--dot-off); transition: background .15s, box-shadow .15s; }
+  .dot.on { background: var(--dot-on); box-shadow: 0 0 8px var(--dot-on), 0 0 16px rgba(255,42,42,.5); }
   .matrix.gold { --dot-on: #ffd23f; }
   .matrix.over { animation: shake .4s; }
-  @keyframes shake {
-    0%,100% { transform: translateX(0); }
-    25% { transform: translateX(-6px); }
-    75% { transform: translateX(6px); }
-  }
+  @keyframes shake { 0%,100% { transform: translateX(0); } 25% { transform: translateX(-6px); } 75% { transform: translateX(6px); } }
 
-  /* ----- Status text ----- */
-  .status {
-    font-family: "Press Start 2P", monospace;
-    text-align: center;
-    font-size: clamp(.9rem, 4vw, 1.4rem);
-    margin: 10px 0 6px;
-    line-height: 1.5;
-  }
+  .status { font-family: "Press Start 2P", monospace; text-align: center; font-size: clamp(.9rem, 4vw, 1.4rem); margin: 10px 0 6px; line-height: 1.5; }
   .sub { text-align: center; color: var(--muted); font-size: 1.1rem; margin-bottom: 18px; }
-  .banner {
-    display: none;
-    text-align: center;
-    font-family: "Press Start 2P", monospace;
-    color: #ffd23f;
-    font-size: clamp(.8rem, 3.5vw, 1.1rem);
-    margin: 0 0 16px;
-    animation: pulse .8s infinite alternate;
-  }
+  .banner { display: none; text-align: center; font-family: "Press Start 2P", monospace; color: #ffd23f; font-size: clamp(.8rem, 3.5vw, 1.1rem); margin: 0 0 16px; animation: pulse .8s infinite alternate; }
   .banner.show { display: block; }
   @keyframes pulse { from { opacity: .5; transform: scale(.97); } to { opacity: 1; transform: scale(1.03); } }
 
   /* ----- Cards ----- */
-  .card {
-    background: var(--panel);
-    border: 1px solid #2c2756;
-    border-radius: 14px;
-    padding: 18px;
-    margin: 14px 0;
+  .card { background: var(--panel); border: 1px solid var(--line); border-radius: 14px; padding: 18px; margin: 14px 0; }
+  .card h2 { font-family: "JetBrains Mono", monospace; font-size: 1rem; color: var(--pink); margin: 0 0 4px; }
+  .card .what { color: var(--muted); font-size: .95rem; margin: 0 0 14px; }
+
+  /* Serial monitor */
+  .serial {
+    background: #000; border-radius: 8px; padding: 12px; min-height: 150px; max-height: 240px; overflow-y: auto;
+    font-family: "JetBrains Mono", monospace; font-size: .85rem; line-height: 1.6;
   }
-  .card h2 {
-    font-family: "Press Start 2P", monospace;
-    font-size: .8rem; color: var(--pink); margin: 0 0 14px;
+  .serial .row { border-bottom: 1px dashed #1c1c1c; padding: 4px 0; }
+  .serial .t { color: #666; }
+  .serial .raw { color: var(--neon); font-weight: 700; }
+  .serial .plain { color: #ddd; font-family: Arial, sans-serif; display: block; padding-left: 12px; }
+  .serial .empty { color: #666; }
+
+  /* Code box */
+  .code { background: #0a0918; border-radius: 8px; padding: 10px 0; font-family: "JetBrains Mono", monospace; font-size: .82rem; overflow-x: auto; }
+  .code .ln { display: block; padding: 2px 14px; white-space: pre; color: #8f8ab8; border-left: 4px solid transparent; transition: background .2s; }
+  .code .ln.hl { background: rgba(57,255,20,.14); color: #fff; border-left-color: var(--neon); }
+  .code .kw { color: var(--pink); }
+  .code .fn { color: var(--cyan); }
+  .code .cm { color: #5d5885; }
+  .explain-line {
+    margin-top: 12px; padding: 12px 14px; background: #221d45; border-radius: 10px;
+    font-size: 1.05rem; min-height: 48px;
   }
-  .beat {
-    text-align: center; font-size: 1.1rem; margin-bottom: 12px;
-  }
+  .explain-line b { color: var(--neon); }
+
+  /* Mailbox / polling */
+  .mailbox { display: flex; align-items: center; gap: 16px; }
+  .mailbox .icon { font-size: 2.6rem; transition: transform .2s; }
+  .mailbox .icon.check { animation: bump .6s; }
+  @keyframes bump { 0% { transform: scale(1); } 40% { transform: scale(1.25) rotate(-8deg); } 100% { transform: scale(1); } }
+  .mailbox .info { font-size: 1rem; }
+  .mailbox .info b { color: var(--cyan); }
+  .newmail { color: var(--neon); font-weight: bold; }
+
+  /* Leaderboard */
+  .beat { text-align: center; font-size: 1.1rem; margin-bottom: 12px; }
   .beat b { color: var(--neon); font-size: 1.6rem; }
   ol.scores { margin: 0; padding-left: 28px; }
-  ol.scores li { padding: 6px 0; border-bottom: 1px solid #2c2756; font-size: 1.05rem; }
+  ol.scores li { padding: 6px 0; border-bottom: 1px solid var(--line); font-size: 1.05rem; }
   ol.scores li:last-child { border-bottom: 0; }
   ol.scores li b { color: var(--neon); }
   ol.scores .when { color: var(--muted); font-size: .85rem; }
   .empty { color: var(--muted); }
 
+  /* How it works */
   .steps { display: flex; align-items: center; justify-content: center; gap: 10px; flex-wrap: wrap; text-align: center; }
   .step { background: #221d45; border-radius: 10px; padding: 10px 12px; min-width: 120px; }
   .step .icon { font-size: 1.8rem; }
@@ -147,22 +136,51 @@
 
   <!-- Leaderboard -->
   <div class="card">
-    <h2>🏆 TOP SCORES</h2>
+    <h2>// TOP SCORES</h2>
+    <p class="what">Every score here came from the Arduino, through the internet.</p>
     <div class="beat">Score to beat: <b id="toBeat">0</b></div>
     <ol class="scores" id="scores"></ol>
   </div>
 
+  <!-- 1. Serial monitor -->
+  <div class="card">
+    <h2>// 1. LIVE MESSAGES</h2>
+    <p class="what">These are the real messages the Arduino sends over the internet, with what each one means.</p>
+    <div class="serial" id="serial"><div class="empty">Waiting for the first message...</div></div>
+  </div>
+
+  <!-- 2. Code -->
+  <div class="card">
+    <h2>// 2. THE CODE RUNNING RIGHT NOW</h2>
+    <p class="what">This is real code from the Arduino. The green line is what's happening this second.</p>
+    <div class="code" id="code"></div>
+    <div class="explain-line" id="explainLine"></div>
+  </div>
+
+  <!-- 3. Polling -->
+  <div class="card">
+    <h2>// 3. CHECKING THE MAILBOX</h2>
+    <p class="what">This screen asks Adafruit IO <i>"anything new?"</i> every 2 seconds. That's called <b>polling</b>.</p>
+    <div class="mailbox">
+      <div class="icon" id="mailIcon">📪</div>
+      <div class="info">
+        Checked <b id="checks">0</b> times<br>
+        Last check: <span id="lastCheck">-</span> &nbsp;<span id="mailNews"></span>
+      </div>
+    </div>
+  </div>
+
   <!-- How it works -->
   <div class="card">
-    <h2>📡 HOW IT WORKS</h2>
+    <h2>// HOW IT ALL CONNECTS</h2>
     <div class="steps">
-      <div class="step"><div class="icon">🤖</div>Arduino</div>
+      <div class="step"><div class="icon">🤖</div>Arduino<br><small>sends the score</small></div>
       <div class="arrow">→</div>
-      <div class="step"><div class="icon">☁️</div>Adafruit IO</div>
+      <div class="step"><div class="icon">☁️</div>Adafruit IO<br><small>holds the message</small></div>
       <div class="arrow">→</div>
-      <div class="step"><div class="icon">💻</div>This screen</div>
+      <div class="step"><div class="icon">💻</div>This screen<br><small>checks and shows it</small></div>
     </div>
-    <p class="explain">Every round and every score you see here traveled from the Arduino, through the internet, to this screen. It's the same way smart doorbells and fitness trackers work!</p>
+    <p class="explain">This is how smart doorbells, fitness trackers and phone apps work: a small computer sends a message to the cloud, and an app checks for it.</p>
   </div>
 
   <div class="footer">
@@ -176,10 +194,10 @@
 
 <script>
 /* ---------- SETTINGS ---------- */
-const IO_USERNAME = "eagle_vivien";   // your Adafruit IO username
-const GAME_FEED   = "game";           // the feed the Arduino sends to
-const POLL_MS     = 2000;             // check every 2 seconds. Keep >= 2000.
-const BACK_TO_GO_MS = 10000;          // after GAME OVER, go back to GO after this long
+const IO_USERNAME   = "eagle_vivien";   // your Adafruit IO username
+const GAME_FEED     = "game";           // the feed the Arduino sends to
+const POLL_MS       = 2000;             // check every 2 seconds. Keep >= 2000.
+const BACK_TO_GO_MS = 10000;            // after GAME OVER, go back to GO after this long
 
 /* ---------- KEY (stays in this browser only, never in this file) ---------- */
 function getKey() {
@@ -214,7 +232,6 @@ for (let i = 0; i < COLS * ROWS; i++) {
   dots.push(d);
 }
 
-// 5x7 letters, like the Arduino's Font_5x7
 const GLYPHS = {
   "0": [" ### ","#   #","#  ##","# # #","##  #","#   #"," ### "],
   "1": ["  #  "," ##  ","  #  ","  #  ","  #  ","  #  "," ### "],
@@ -230,7 +247,6 @@ const GLYPHS = {
   "O": [" ### ","#   #","#   #","#   #","#   #","#   #"," ### "]
 };
 
-// Draws up to 2 characters, starting at the left, just like the Arduino.
 function drawText(text) {
   dots.forEach(d => d.classList.remove("on"));
   let x = 0;
@@ -246,6 +262,78 @@ function drawText(text) {
     }
     x += 6;
   }
+}
+
+/* =====================================================================
+   1. LIVE MESSAGES (looks like the Arduino Serial Monitor)
+   ===================================================================== */
+const serialEl = document.getElementById("serial");
+let serialStarted = false;
+
+function logMessage(raw, plain) {
+  if (!serialStarted) { serialEl.innerHTML = ""; serialStarted = true; }
+  const row = document.createElement("div");
+  row.className = "row";
+  const t = new Date().toLocaleTimeString();
+  row.innerHTML = `<span class="t">${t}</span> &nbsp;📥 game feed → <span class="raw"></span><span class="plain"></span>`;
+  row.querySelector(".raw").textContent = `"${raw}"`;
+  row.querySelector(".plain").textContent = "↳ " + plain;
+  serialEl.appendChild(row);
+  while (serialEl.children.length > 12) serialEl.removeChild(serialEl.firstChild);
+  serialEl.scrollTop = serialEl.scrollHeight;
+}
+
+/* =====================================================================
+   2. THE CODE RUNNING RIGHT NOW
+   Real lines from the Arduino sketch, plus a plain-English explanation.
+   ===================================================================== */
+const CODE = [
+  { html: '<span class="kw">void</span> <span class="fn">loop</span>() {', explain: "" },
+  { html: '  <span class="fn">waitForPress</span>(0);           <span class="cm">// wait for a player</span>',
+    explain: "The Arduino is <b>waiting</b> for someone to press a button to start a game." },
+  { html: '  <span class="fn">playGame</span>();                <span class="cm">// start!</span>',
+    explain: "A button was pressed, so the game starts!" },
+  { html: '}', explain: "" },
+  { html: '', explain: "" },
+  { html: '<span class="kw">void</span> <span class="fn">playGame</span>() {', explain: "" },
+  { html: '  sequence[length] = <span class="fn">random</span>(3);  <span class="cm">// pick a color</span>',
+    explain: "The Arduino <b>picks a random color</b> (0 = red, 1 = green, 2 = blue) and adds it to the pattern." },
+  { html: '  <span class="fn">sendStatus</span>(<span class="kw">"round:"</span> + length);  <span class="cm">// tell the internet</span>',
+    explain: "This line <b>sends the round number through the internet</b> to this screen." },
+  { html: '  <span class="fn">flashColor</span>(sequence[s]);   <span class="cm">// show the pattern</span>',
+    explain: "The Arduino <b>flashes each color and plays its note</b> so players can memorize the pattern." },
+  { html: '  <span class="kw">int</span> p = <span class="fn">waitForPress</span>(5000); <span class="cm">// players\' turn</span>',
+    explain: "Now it's the <b>players' turn</b>. The Arduino waits up to 5 seconds for each button press." },
+  { html: '  <span class="kw">if</span> (p != sequence[s]) <span class="fn">gameOver</span>(score);',
+    explain: "An <b>if statement</b> checks: did they press the right button? If not, it's game over!" },
+  { html: '}', explain: "" },
+  { html: '', explain: "" },
+  { html: '<span class="kw">void</span> <span class="fn">gameOver</span>(<span class="kw">int</span> score) {', explain: "" },
+  { html: '  <span class="fn">sendStatus</span>(<span class="kw">"over:"</span> + score);  <span class="cm">// send the score</span>',
+    explain: "This line <b>sends the final score through the internet</b> to the leaderboard." },
+  { html: '}', explain: "" }
+];
+
+const codeEl = document.getElementById("code");
+const explainEl = document.getElementById("explainLine");
+CODE.forEach((line) => {
+  const span = document.createElement("span");
+  span.className = "ln";
+  span.innerHTML = line.html || " ";
+  codeEl.appendChild(span);
+});
+const codeLines = codeEl.querySelectorAll(".ln");
+
+let codeTimers = [];
+function highlight(i) {
+  codeLines.forEach(l => l.classList.remove("hl"));
+  if (codeLines[i]) codeLines[i].classList.add("hl");
+  explainEl.innerHTML = CODE[i] ? CODE[i].explain : "";
+}
+// Steps through several lines over time: [[lineNumber, delayMs], ...]
+function playCode(steps) {
+  codeTimers.forEach(t => clearTimeout(t));
+  codeTimers = steps.map(([line, delay]) => setTimeout(() => highlight(line), delay));
 }
 
 /* =====================================================================
@@ -300,6 +388,7 @@ function showWaiting() {
   drawText("GO");
   statusEl.textContent = "Press any button to play!";
   subEl.textContent = "Score to beat: " + bestScore();
+  playCode([[1, 0]]);
 }
 
 function showRound(n) {
@@ -309,6 +398,8 @@ function showRound(n) {
   drawText(n);
   statusEl.textContent = "ROUND " + n;
   subEl.textContent = "Watch the pattern... then copy it!";
+  // Walk through the code the way the Arduino does
+  playCode([[6, 0], [7, 900], [8, 1900], [9, 3600]]);
 }
 
 function showGameOver(score) {
@@ -322,24 +413,35 @@ function showGameOver(score) {
 
   drawText(score);
   matrixEl.classList.remove("over");
-  void matrixEl.offsetWidth;            // restart the shake animation
+  void matrixEl.offsetWidth;
   matrixEl.classList.add("over");
   matrixEl.classList.toggle("gold", isBest);
   bannerEl.classList.toggle("show", isBest);
 
   statusEl.textContent = "GAME OVER";
   subEl.textContent = "Your score: " + score + (score === 1 ? " round" : " rounds");
+  playCode([[10, 0], [14, 1400]]);
 
   backTimer = setTimeout(showWaiting, BACK_TO_GO_MS);
 }
 
 /* =====================================================================
-   CHECK THE GAME FEED every POLL_MS
+   3. CHECK THE MAILBOX (polling) every POLL_MS
    ===================================================================== */
 let lastSeenId = null;
+let checks = 0;
 const problemEl = document.getElementById("problem");
+const mailIcon  = document.getElementById("mailIcon");
+const mailNews  = document.getElementById("mailNews");
 
 async function checkGame() {
+  checks++;
+  document.getElementById("checks").textContent = checks;
+  document.getElementById("lastCheck").textContent = new Date().toLocaleTimeString();
+  mailIcon.classList.remove("check");
+  void mailIcon.offsetWidth;
+  mailIcon.classList.add("check");
+
   try {
     const res = await fetch(BASE + GAME_FEED + "/data/last", {
       headers: { "X-AIO-Key": IO_KEY }
@@ -357,14 +459,29 @@ async function checkGame() {
       const value = String(data.value);
 
       if (firstLoad) {               // don't replay an old game when the page opens
+        mailIcon.textContent = "📪";
+        mailNews.textContent = "";
         showWaiting();
         return;
       }
+
+      mailIcon.textContent = "📬";
+      mailNews.innerHTML = '<span class="newmail">New mail!</span>';
+
       if (value.startsWith("round:")) {
-        showRound(parseInt(value.slice(6)) || 0);
+        const n = parseInt(value.slice(6)) || 0;
+        logMessage(value, `Round ${n} started. The Arduino is showing the pattern.`);
+        showRound(n);
       } else if (value.startsWith("over:")) {
-        showGameOver(parseInt(value.slice(5)) || 0);
+        const n = parseInt(value.slice(5)) || 0;
+        logMessage(value, `Game over! Final score: ${n}. Sent to the leaderboard.`);
+        showGameOver(n);
+      } else {
+        logMessage(value, "A message the game doesn't use.");
       }
+    } else {
+      mailIcon.textContent = "📪";
+      mailNews.textContent = "Nothing new.";
     }
   } catch (err) {
     problemEl.textContent = "Could not reach Adafruit IO: " + err.message;
