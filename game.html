@@ -7,21 +7,23 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
 <style>
-  /* ============ ONE PALETTE: midnight jewels + parchment + gold ============ */
+  /* ============ PREMIUM GAME STYLE: midnight + glass + violet→pink→amber ============ */
   :root {
-    --night: #0f1b3d;
-    --plum: #1a1240;
-    --ink: #2e2216;
-    --parchment: #f5ead2;
-    --parchment-dark: #e6d6ad;
-    --gold: #c9a24a;
-    --gold-bright: #f4d47a;
-    --ember: #e8833a;
-    --burgundy: #7a1f2b;
-    --emerald: #1f6b4a;
-    --sapphire: #1e4fd1;
-    --dot-off: #2a1a0e;
-    --dot-on: #ffb347;
+    --bg1: #0b0b1f;
+    --bg2: #16123d;
+    --text: #f4f3ff;
+    --muted: #b0aed2;
+    --line: rgba(255,255,255,.12);
+    --glass: rgba(255,255,255,.06);
+    --violet: #7c5cff;
+    --pink: #ff4d8d;
+    --amber: #ffb547;
+    --gold: #ffd166;
+    --mint: #3ddc97;
+    --sky: #4cc9ff;
+    --accent: linear-gradient(90deg, #7c5cff, #ff4d8d, #ffb547);
+    --dot-off: #241536;
+    --dot-on: #ff5a7a;
     --font: "Poppins", Arial, sans-serif;
   }
   * { box-sizing: border-box; }
@@ -31,25 +33,25 @@
     font-family: var(--font);
     font-size: 19px;
     line-height: 1.5;
-    color: var(--parchment);
+    color: var(--text);
     min-height: 100vh;
     background:
-      radial-gradient(circle at 15% 10%, rgba(30,79,209,.35) 0%, transparent 45%),
-      radial-gradient(circle at 85% 30%, rgba(31,107,74,.3) 0%, transparent 45%),
-      radial-gradient(circle at 50% 95%, rgba(244,212,122,.14) 0%, transparent 50%),
-      linear-gradient(160deg, var(--night) 0%, var(--plum) 55%, #0b0f24 100%);
+      radial-gradient(circle at 12% 8%,  rgba(124,92,255,.35) 0%, transparent 42%),
+      radial-gradient(circle at 88% 22%, rgba(255,77,141,.25) 0%, transparent 42%),
+      radial-gradient(circle at 50% 100%, rgba(255,181,71,.16) 0%, transparent 50%),
+      linear-gradient(170deg, var(--bg2) 0%, var(--bg1) 60%);
     background-attachment: fixed;
   }
 
-  /* Slow drifting aurora */
+  /* Slow glowing aurora */
   body::after {
     content: ""; position: fixed; inset: -20%;
     pointer-events: none; z-index: 0;
     background:
-      radial-gradient(ellipse 40% 25% at 30% 30%, rgba(30,79,209,.22), transparent 70%),
-      radial-gradient(ellipse 35% 22% at 70% 55%, rgba(31,107,74,.2), transparent 70%),
-      radial-gradient(ellipse 30% 20% at 45% 80%, rgba(244,212,122,.12), transparent 70%);
-    filter: blur(30px);
+      radial-gradient(ellipse 40% 25% at 30% 30%, rgba(124,92,255,.28), transparent 70%),
+      radial-gradient(ellipse 35% 22% at 70% 55%, rgba(255,77,141,.2), transparent 70%),
+      radial-gradient(ellipse 30% 20% at 45% 80%, rgba(76,201,255,.14), transparent 70%);
+    filter: blur(34px);
     animation: aurora 30s ease-in-out infinite alternate;
   }
   @keyframes aurora {
@@ -58,274 +60,282 @@
     100% { transform: translate(-4%, 3%) rotate(-6deg); }
   }
 
-  /* Floating gold sparkles */
+  /* Tiny floating light particles */
   body::before {
     content: ""; position: fixed; left: 0; right: 0; top: 0; bottom: -240px;
     pointer-events: none; z-index: 0;
     background-image:
-      radial-gradient(1.5px 1.5px at 20px 30px,  rgba(244,212,122,.9), transparent),
-      radial-gradient(1px 1px     at 120px 80px, rgba(255,255,255,.8), transparent),
-      radial-gradient(2px 2px     at 200px 160px, rgba(244,212,122,.7), transparent),
-      radial-gradient(1px 1px     at 60px 200px, rgba(255,240,200,.8), transparent),
-      radial-gradient(1.5px 1.5px at 260px 40px, rgba(244,212,122,.6), transparent);
+      radial-gradient(1.5px 1.5px at 20px 30px,  rgba(255,255,255,.8), transparent),
+      radial-gradient(1px 1px     at 120px 80px, rgba(196,181,255,.8), transparent),
+      radial-gradient(2px 2px     at 200px 160px, rgba(255,160,200,.6), transparent),
+      radial-gradient(1px 1px     at 60px 200px, rgba(255,255,255,.7), transparent),
+      radial-gradient(1.5px 1.5px at 260px 40px, rgba(255,214,140,.6), transparent);
     background-size: 300px 240px;
-    animation: drift 28s linear infinite, twinkle 5s ease-in-out infinite alternate;
+    animation: drift 30s linear infinite, twinkle 5s ease-in-out infinite alternate;
   }
   @keyframes drift   { to { transform: translateY(-240px); } }
-  @keyframes twinkle { from { opacity: .35; } to { opacity: .8; } }
+  @keyframes twinkle { from { opacity: .3; } to { opacity: .75; } }
 
   /* Rising heat glow from the bottom of the screen */
   .heat {
     position: fixed; inset: 0; pointer-events: none; z-index: 0;
-    background: radial-gradient(ellipse 85% 60% at 50% 115%, rgba(232,131,58,.6), transparent 70%);
+    background: radial-gradient(ellipse 85% 60% at 50% 115%, rgba(255,77,141,.55), rgba(255,181,71,.2) 45%, transparent 70%);
     opacity: 0; transition: opacity 1.2s ease;
   }
 
   .wrap { max-width: 780px; margin: 0 auto; position: relative; z-index: 1; }
 
-  /* Title */
+  /* Title with the signature gradient */
   h1 {
-    font-family: var(--font); font-weight: 800;
-    font-size: clamp(2rem, 7vw, 3.3rem);
-    text-align: center; margin: 8px 0 6px;
-    color: var(--gold-bright);
-    text-shadow: 0 0 22px rgba(244,212,122,.45), 0 2px 0 #5a3d10;
-    letter-spacing: 1px;
+    font-weight: 800;
+    font-size: clamp(2.3rem, 8vw, 3.6rem);
+    text-align: center; margin: 6px 0 4px;
+    background: var(--accent);
+    -webkit-background-clip: text; background-clip: text;
+    color: transparent;
+    filter: drop-shadow(0 0 18px rgba(255,77,141,.35));
+    letter-spacing: -.5px;
   }
-  h1::before, h1::after { content: " ✦ "; color: var(--gold); font-size: .55em; vertical-align: middle; }
-  .tagline { text-align: center; color: var(--parchment-dark); font-size: 1.2rem; margin: 0 0 6px; }
-  .soundhint { text-align: center; color: #c9b88e; font-size: 1rem; margin: 0 0 20px; }
-  .soundhint.on { color: #8fe0b0; }
+  .tagline { text-align: center; color: var(--muted); font-size: 1.2rem; margin: 0 0 6px; }
+  .soundhint { text-align: center; color: var(--muted); font-size: .95rem; margin: 0 0 22px; }
+  .soundhint.on { color: var(--mint); }
 
-  /* Wood + gold frame around the Arduino */
+  /* The Arduino board: dark glass with a gradient ring */
   .board {
-    background: linear-gradient(145deg, #4a2e1a, #2a180c);
-    border: 3px solid var(--gold);
-    border-radius: 18px; padding: 22px;
+    border: 2px solid transparent;
+    background:
+      linear-gradient(#12112e, #12112e) padding-box,
+      var(--accent) border-box;
+    border-radius: 24px; padding: 20px;
     margin: 0 auto 18px; max-width: 470px;
-    box-shadow: 0 0 0 6px #2a180c, 0 0 0 8px var(--gold), 0 0 50px rgba(30,79,209,.35), 0 0 80px rgba(244,212,122,.2);
+    box-shadow: 0 0 50px rgba(124,92,255,.35), 0 20px 40px rgba(0,0,0,.4);
     transition: box-shadow 1s ease;
   }
-  .board.hot {
-    box-shadow: 0 0 0 6px #2a180c, 0 0 0 8px var(--gold), 0 0 60px rgba(232,131,58,.6), 0 0 110px rgba(232,131,58,.35);
-  }
+  .board.hot { box-shadow: 0 0 60px rgba(255,77,141,.6), 0 0 120px rgba(255,181,71,.35), 0 20px 40px rgba(0,0,0,.4); }
   .board.pulse { animation: boardPulse .9s ease-in-out infinite alternate; }
   @keyframes boardPulse { from { transform: scale(1); } to { transform: scale(1.02); } }
-  .board-label { font-weight: 600; font-size: .85rem; color: var(--gold-bright); text-align: right; margin-bottom: 10px; }
-  .matrix { display: grid; grid-template-columns: repeat(12, 1fr); gap: 6px; background: #120b06; padding: 14px; border-radius: 10px; }
-  .dot { aspect-ratio: 1; border-radius: 3px; background: var(--dot-off); transition: background .15s, box-shadow .15s; }
-  .dot.on { background: var(--dot-on); box-shadow: 0 0 8px var(--dot-on), 0 0 18px rgba(255,179,71,.6); }
-  .matrix.gold { --dot-on: #fff2a8; }
+  .board-label { font-weight: 600; font-size: .8rem; color: var(--muted); letter-spacing: 2px; text-align: right; margin-bottom: 10px; }
+  .matrix { display: grid; grid-template-columns: repeat(12, 1fr); gap: 6px; background: #07061a; padding: 14px; border-radius: 14px; }
+  .dot { aspect-ratio: 1; border-radius: 50%; background: var(--dot-off); transition: background .15s, box-shadow .15s; }
+  .dot.on { background: var(--dot-on); box-shadow: 0 0 8px var(--dot-on), 0 0 18px rgba(255,90,122,.6); }
+  .matrix.gold { --dot-on: var(--gold); }
+  .matrix.gold .dot.on { box-shadow: 0 0 8px var(--gold), 0 0 20px rgba(255,209,102,.7); }
   .matrix.over { animation: shake .4s; }
   @keyframes shake { 0%,100% { transform: translateX(0); } 25% { transform: translateX(-6px); } 75% { transform: translateX(6px); } }
 
   /* Status text */
   .status {
     font-weight: 800; text-align: center;
-    font-size: clamp(1.4rem, 5.2vw, 2rem);
-    color: var(--gold-bright); text-shadow: 0 0 14px rgba(244,212,122,.5);
-    margin: 10px 0 6px; line-height: 1.3;
+    font-size: clamp(1.5rem, 5.5vw, 2.1rem);
+    color: #fff;
+    text-shadow: 0 0 20px rgba(124,92,255,.6);
+    margin: 10px 0 4px; line-height: 1.25;
   }
-  .sub { text-align: center; color: var(--parchment); font-size: 1.2rem; margin-bottom: 16px; }
+  .sub { text-align: center; color: var(--muted); font-size: 1.15rem; margin-bottom: 16px; }
+  .sub b { color: #fff; }
 
   /* Progress toward the record */
   .progress { display: none; max-width: 520px; margin: 0 auto 16px; }
   .progress.show { display: block; }
-  .bar {
-    height: 20px; border-radius: 999px; overflow: hidden;
-    background: rgba(245,234,210,.12); border: 1px solid rgba(244,212,122,.55);
-  }
+  .bar { height: 16px; border-radius: 999px; overflow: hidden; background: rgba(255,255,255,.08); border: 1px solid var(--line); }
   .fill {
     height: 100%; width: 0; border-radius: 999px;
-    background: linear-gradient(90deg, var(--emerald), var(--gold-bright), var(--ember));
-    background-size: 520px 100%;
+    background: var(--accent); background-size: 520px 100%;
     transition: width .7s ease;
-    box-shadow: 0 0 14px rgba(244,212,122,.5);
+    box-shadow: 0 0 16px rgba(255,77,141,.6);
   }
-  .ptext { text-align: center; margin-top: 8px; font-weight: 600; color: var(--gold-bright); font-size: 1.15rem; }
+  .ptext { text-align: center; margin-top: 8px; font-weight: 600; color: #fff; font-size: 1.12rem; }
 
-  /* "SO CLOSE!" and "TIED!" callouts */
+  /* Callouts: SO CLOSE / TIED / NEW RECORD */
   .callout {
     display: none; text-align: center; font-weight: 800;
     font-size: clamp(1.2rem, 4.8vw, 1.6rem);
-    color: #ffc08f; text-shadow: 0 0 14px rgba(232,131,58,.6);
-    margin: 0 0 16px;
+    background: var(--accent);
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+    filter: drop-shadow(0 0 12px rgba(255,77,141,.5));
+    margin: 0 0 18px;
     animation: pulse 1s ease-in-out infinite alternate;
   }
   .callout.show { display: block; }
-  @keyframes pulse { from { opacity: .65; transform: scale(.98); } to { opacity: 1; transform: scale(1.03); } }
+  @keyframes pulse { from { opacity: .7; transform: scale(.98); } to { opacity: 1; transform: scale(1.04); } }
 
   /* Crown takeover */
   .crown {
     position: fixed; inset: 0; z-index: 10; display: none;
     align-items: center; justify-content: center;
-    background: rgba(8,10,28,.78); padding: 16px; cursor: pointer;
+    background: rgba(6,6,20,.8); backdrop-filter: blur(6px);
+    padding: 16px; cursor: pointer;
   }
   .crown.show { display: flex; }
   .crown-box {
     text-align: center;
-    background: linear-gradient(160deg, #1e2f6e, var(--plum));
-    border: 3px solid var(--gold); border-radius: 22px;
-    padding: 30px 40px;
-    box-shadow: 0 0 0 6px rgba(244,212,122,.15), 0 0 70px rgba(244,212,122,.5);
+    border: 3px solid transparent;
+    background:
+      linear-gradient(160deg, #1d1850, #0f0d2b) padding-box,
+      linear-gradient(90deg, #ffd166, #ff4d8d, #7c5cff) border-box;
+    border-radius: 26px; padding: 30px 44px;
+    box-shadow: 0 0 80px rgba(255,209,102,.45);
     animation: pop .6s cubic-bezier(.2,1.4,.4,1);
   }
   @keyframes pop { from { transform: scale(.5); opacity: 0; } to { transform: scale(1); opacity: 1; } }
   .crown-icon  { font-size: 4.5rem; animation: bounce .9s ease-in-out infinite alternate; }
   @keyframes bounce { to { transform: translateY(-12px); } }
-  .crown-title { color: var(--gold-bright); font-weight: 800; letter-spacing: 3px; font-size: 1.2rem; }
-  .crown-group { color: #fff; font-weight: 800; font-size: clamp(2.2rem, 10vw, 3.6rem); text-shadow: 0 0 22px rgba(244,212,122,.7); line-height: 1.1; margin: 6px 0; }
-  .crown-score { color: var(--parchment); font-size: 1.25rem; }
+  .crown-title { color: var(--gold); font-weight: 800; letter-spacing: 4px; font-size: 1.1rem; }
+  .crown-group {
+    font-weight: 800; font-size: clamp(2.4rem, 10vw, 3.8rem); line-height: 1.1; margin: 6px 0;
+    background: linear-gradient(90deg, #ffd166, #ffb547, #ff4d8d);
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+  }
+  .crown-score { color: var(--text); font-size: 1.2rem; }
 
-  /* Each section is a parchment page */
+  /* Frosted glass sections */
   .card {
-    background:
-      radial-gradient(ellipse at center, rgba(255,255,255,.4) 0%, transparent 70%),
-      linear-gradient(180deg, #f8eed8 0%, #ecdcb0 100%);
-    color: var(--ink);
-    border: 2px solid var(--gold);
-    border-radius: 8px;
+    background: linear-gradient(180deg, rgba(255,255,255,.08), rgba(255,255,255,.03));
+    border: 1px solid var(--line);
+    border-radius: 22px;
     padding: 24px 20px;
     margin: 18px 0;
-    box-shadow: inset 0 0 30px rgba(120,80,30,.3), 0 10px 28px rgba(0,0,0,.45);
-    outline: 1px solid rgba(201,162,74,.5);
-    outline-offset: -8px;
-    transition: transform .25s, box-shadow .25s;
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    box-shadow: 0 20px 40px rgba(0,0,0,.3);
+    transition: transform .25s, border-color .25s, box-shadow .25s;
   }
-  .card:hover { transform: translateY(-3px); box-shadow: inset 0 0 30px rgba(120,80,30,.3), 0 16px 34px rgba(0,0,0,.5); }
-  .card h2 { font-weight: 800; font-size: 1.2rem; color: var(--burgundy); letter-spacing: .5px; text-align: center; margin: 0 0 6px; }
-  .card h2::before { content: "❦ "; color: var(--gold); }
-  .card h2::after  { content: " ❦"; color: var(--gold); }
-  .card .what { color: #4f3d28; text-align: center; margin: 0 0 16px; font-size: 1.05rem; }
+  .card:hover { transform: translateY(-3px); border-color: rgba(255,255,255,.22); box-shadow: 0 26px 50px rgba(0,0,0,.4); }
+  .card h2 {
+    font-weight: 800; font-size: 1rem; letter-spacing: 2px; text-align: center; margin: 0 0 6px;
+    background: var(--accent);
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+  }
+  .card .what { color: var(--muted); text-align: center; margin: 0 0 18px; font-size: 1.05rem; }
+  .card .what b { color: #fff; }
 
-  /* Button key: jewel gems (same red / green / blue as the Arduino) */
+  /* Button key: glossy candy buttons (same red / green / blue as the Arduino) */
   .keyrow { display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; }
   .gem {
-    width: 132px; padding: 14px 8px 14px;
-    border: 2px solid var(--gold); border-radius: 18px;
+    width: 134px; padding: 14px 8px;
+    border: 0; border-radius: 22px;
     cursor: pointer; color: #fff; text-align: center;
     font-family: var(--font);
     background:
-      radial-gradient(circle at 30% 22%, rgba(255,255,255,.55), transparent 42%),
+      radial-gradient(circle at 30% 18%, rgba(255,255,255,.55), transparent 40%),
       linear-gradient(160deg, var(--gem-light), var(--gem));
-    box-shadow: 0 6px 0 rgba(0,0,0,.3), inset 0 -8px 14px rgba(0,0,0,.25);
-    transition: transform .12s, box-shadow .25s;
+    box-shadow: 0 8px 0 var(--gem-dark), 0 14px 24px rgba(0,0,0,.35);
+    transition: transform .12s, box-shadow .2s;
   }
-  .gem .shape  { font-size: 1.3rem; display: block; opacity: .95; }
-  .gem .letter { font-size: 2.4rem; font-weight: 800; display: block; line-height: 1.1; text-shadow: 0 2px 4px rgba(0,0,0,.4); }
+  .gem .shape  { font-size: 1.2rem; display: block; opacity: .95; }
+  .gem .letter { font-size: 2.4rem; font-weight: 800; display: block; line-height: 1.1; text-shadow: 0 2px 6px rgba(0,0,0,.3); }
   .gem .label  { font-size: 1.1rem; font-weight: 600; display: block; }
-  .gem .note   { font-size: .95rem; display: block; opacity: .95; }
-  .gem.red   { --gem: #9e0f2c; --gem-light: #d8304f; }
-  .gem.green { --gem: #0d6e46; --gem-light: #22a86d; }
-  .gem.blue  { --gem: #173f9e; --gem-light: #3a6fe6; }
+  .gem .note   { font-size: .9rem; display: block; opacity: .95; }
+  .gem.red   { --gem: #d81b48; --gem-light: #ff5a7a; --gem-dark: #8f0f2f; }
+  .gem.green { --gem: #12a86b; --gem-light: #3ddc97; --gem-dark: #0a6a44; }
+  .gem.blue  { --gem: #2563eb; --gem-light: #4cc9ff; --gem-dark: #173f9e; }
   .gem:hover { transform: translateY(-2px); }
   .gem.lit, .gem:active {
-    transform: translateY(3px) scale(1.06);
-    box-shadow: 0 0 24px var(--gem-light), 0 0 50px var(--gem-light), inset 0 -8px 14px rgba(0,0,0,.25);
+    transform: translateY(6px);
+    box-shadow: 0 2px 0 var(--gem-dark), 0 0 30px var(--gem-light), 0 0 60px var(--gem-light);
   }
 
   /* Leaderboard + ranks */
-  .beat { text-align: center; font-size: 1.2rem; margin-bottom: 12px; color: var(--ink); }
-  .beat b { color: var(--burgundy); font-weight: 800; font-size: 1.9rem; }
-  .beat .who { color: #6e5a40; font-size: 1rem; }
+  .beat { text-align: center; font-size: 1.15rem; margin-bottom: 14px; color: var(--muted); }
+  .beat b { color: var(--gold); font-weight: 800; font-size: 2rem; text-shadow: 0 0 16px rgba(255,209,102,.5); }
+  .beat .who { color: var(--muted); font-size: 1rem; }
   ol.scores { margin: 0; padding-left: 30px; }
-  ol.scores li { padding: 8px 0; border-bottom: 1px solid rgba(122,31,43,.25); font-size: 1.15rem; color: var(--ink); }
+  ol.scores li { padding: 9px 0; border-bottom: 1px solid var(--line); font-size: 1.12rem; color: var(--text); }
   ol.scores li:last-child { border-bottom: 0; }
-  ol.scores li b { color: var(--emerald); }
-  ol.scores li:nth-child(1) b { color: #9a7300; }
-  ol.scores li:nth-child(2) b { color: #5e5e6e; }
-  ol.scores li:nth-child(3) b { color: #8a4b1f; }
+  ol.scores li b { color: #fff; }
+  ol.scores li:nth-child(1) b { color: var(--gold); }
+  ol.scores li:nth-child(2) b { color: #d6d8e6; }
+  ol.scores li:nth-child(3) b { color: #f0a46b; }
   ol.scores li:nth-child(1)::after { content: "  🥇"; }
   ol.scores li:nth-child(2)::after { content: "  🥈"; }
   ol.scores li:nth-child(3)::after { content: "  🥉"; }
-  .empty { color: #6e5a40; }
+  .empty { color: var(--muted); }
   .rankchip {
-    display: inline-block; margin-left: 6px; padding: 2px 10px;
+    display: inline-block; margin-left: 6px; padding: 3px 12px;
     border-radius: 999px; font-size: .85rem; font-weight: 600;
     color: #fff; background: var(--rc);
-    box-shadow: inset 0 -2px 0 rgba(0,0,0,.2);
+    box-shadow: 0 0 14px color-mix(in srgb, var(--rc) 60%, transparent);
   }
-  .ladder { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-top: 16px; padding-top: 14px; border-top: 1px dashed rgba(122,31,43,.35); }
+  .ladder { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-top: 18px; padding-top: 16px; border-top: 1px solid var(--line); }
   .ladder .rankchip { margin: 0; }
   .ladder .range { opacity: .85; font-weight: 400; }
 
-  /* Fact lists (psychology, did you know) */
-  .facts { display: grid; gap: 12px; }
-  .fact { background: rgba(255,255,255,.4); border: 1px solid rgba(201,162,74,.6); border-left: 5px solid var(--sapphire); border-radius: 10px; padding: 14px; font-size: 1.05rem; }
-  .fact:nth-child(3n+2) { border-left-color: var(--emerald); }
-  .fact:nth-child(3n)   { border-left-color: var(--gold); }
-  .fact b { color: var(--burgundy); }
-
   /* About the maker */
-  .maker-hi { text-align: center; font-size: 1.15rem; margin: 0 0 14px; }
-  .maker-hi b { color: var(--burgundy); font-size: 1.3rem; }
+  .maker-hi { text-align: center; font-size: 1.15rem; margin: 0 0 16px; color: var(--muted); }
+  .maker-hi b { color: #fff; font-size: 1.3rem; }
   .loves { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; }
-  .love { background: rgba(255,255,255,.4); border: 1px solid rgba(201,162,74,.6); border-radius: 12px; padding: 14px; text-align: center; }
+  .love { background: var(--glass); border: 1px solid var(--line); border-radius: 18px; padding: 16px; text-align: center; transition: transform .25s; }
+  .love:hover { transform: translateY(-3px); }
   .love .icon { font-size: 2rem; }
-  .love .name { font-weight: 800; color: var(--burgundy); font-size: 1.1rem; }
-  .love .how  { color: #4f3d28; font-size: 1rem; }
+  .love .name { font-weight: 800; font-size: 1.1rem; }
+  .love:nth-child(1) .name { color: var(--violet); }
+  .love:nth-child(2) .name { color: var(--pink); }
+  .love:nth-child(3) .name { color: var(--amber); }
+  .love .how  { color: var(--muted); font-size: 1rem; }
 
   /* Live messages */
   .serial {
-    background: #1c130d; border: 1px solid #5a3d10; border-radius: 8px;
-    padding: 12px; min-height: 150px; max-height: 260px; overflow-y: auto;
-    font-family: "JetBrains Mono", monospace; font-size: .92rem; line-height: 1.6;
+    background: #07061a; border: 1px solid var(--line); border-radius: 14px;
+    padding: 12px 14px; min-height: 150px; max-height: 260px; overflow-y: auto;
+    font-family: "JetBrains Mono", monospace; font-size: .9rem; line-height: 1.6;
   }
-  .serial .row { border-bottom: 1px dashed #3a2a1a; padding: 5px 0; }
-  .serial .t { color: #a8916b; }
-  .serial .raw { color: var(--gold-bright); font-weight: 700; }
-  .serial .plain { color: #f5ead2; font-family: var(--font); font-size: 1rem; display: block; padding-left: 12px; }
-  .serial .empty { color: #a8916b; }
+  .serial .row { border-bottom: 1px dashed rgba(255,255,255,.08); padding: 5px 0; }
+  .serial .t { color: #6f6d92; }
+  .serial .raw { color: var(--amber); font-weight: 700; }
+  .serial .plain { color: var(--text); font-family: var(--font); font-size: 1rem; display: block; padding-left: 12px; }
+  .serial .empty { color: #6f6d92; }
 
   /* Code box */
-  .code { background: #1c130d; border: 1px solid #5a3d10; border-radius: 8px; padding: 10px 0; font-family: "JetBrains Mono", monospace; font-size: .9rem; overflow-x: auto; }
-  .code .ln { display: block; padding: 3px 14px; white-space: pre; color: #d4c09a; border-left: 4px solid transparent; transition: background .2s; }
+  .code { background: #07061a; border: 1px solid var(--line); border-radius: 14px; padding: 10px 0; font-family: "JetBrains Mono", monospace; font-size: .9rem; overflow-x: auto; }
+  .code .ln { display: block; padding: 3px 14px; white-space: pre; color: #9d9bc4; border-left: 4px solid transparent; transition: background .2s; }
   .code .ln.clickable { cursor: pointer; }
-  .code .ln.clickable:hover { background: rgba(244,212,122,.08); }
-  .code .ln.hl { background: rgba(244,212,122,.2); border-left-color: var(--gold-bright); color: #fff8e6; }
-  .code .kw { color: #f08a9a; }
-  .code .fn { color: #9fe0a0; }
-  .code .cm { color: #9a8462; font-style: italic; }
+  .code .ln.clickable:hover { background: rgba(124,92,255,.1); }
+  .code .ln.hl { background: rgba(124,92,255,.22); border-left-color: var(--pink); color: #fff; }
+  .code .kw { color: #ff7aa8; }
+  .code .fn { color: #7fe0ff; }
+  .code .cm { color: #6f6d92; font-style: italic; }
   .explain-line {
-    margin-top: 12px; padding: 14px 16px; border-radius: 10px; min-height: 52px;
-    background: rgba(122,31,43,.08); border: 1px solid rgba(122,31,43,.3);
-    color: var(--ink); font-size: 1.12rem;
+    margin-top: 12px; padding: 14px 16px; border-radius: 14px; min-height: 52px;
+    background: rgba(124,92,255,.12); border: 1px solid rgba(124,92,255,.35);
+    color: var(--text); font-size: 1.1rem;
   }
-  .explain-line b { color: var(--burgundy); }
+  .explain-line b { color: var(--amber); }
 
   /* Mailbox */
-  .mailbox { display: flex; align-items: center; gap: 18px; }
+  .mailbox { display: flex; align-items: center; gap: 18px; justify-content: center; }
   .mailbox .icon { font-size: 2.8rem; transition: transform .2s; }
   .mailbox .icon.check { animation: bump .6s; }
   @keyframes bump { 0% { transform: scale(1); } 40% { transform: scale(1.25) rotate(-8deg); } 100% { transform: scale(1); } }
-  .mailbox .info { font-size: 1.12rem; color: var(--ink); }
-  .mailbox .info b { color: var(--burgundy); }
-  .newmail { color: var(--emerald); font-weight: bold; }
+  .mailbox .info { font-size: 1.1rem; color: var(--muted); }
+  .mailbox .info b { color: #fff; }
+  .newmail { color: var(--mint); font-weight: bold; }
 
   /* What I Learned */
   .learned { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 12px; }
-  .skill { background: rgba(255,255,255,.4); border: 1px solid rgba(201,162,74,.6); border-left: 5px solid var(--sapphire); border-radius: 10px; padding: 14px; color: var(--ink); transition: transform .25s, background .25s; }
-  .skill:hover { transform: translateY(-3px); background: rgba(255,255,255,.6); }
+  .skill { background: var(--glass); border: 1px solid var(--line); border-left: 4px solid var(--violet); border-radius: 16px; padding: 14px; transition: transform .25s, background .25s; }
+  .skill:hover { transform: translateY(-3px); background: rgba(255,255,255,.1); }
   .skill .name { font-weight: 800; font-size: 1.05rem; margin-bottom: 4px; }
-  .skill .used { color: #45351f; font-size: 1rem; }
-  .skill:nth-child(3n+1) { border-left-color: var(--sapphire); }
-  .skill:nth-child(3n+2) { border-left-color: var(--emerald); }
-  .skill:nth-child(3n)   { border-left-color: var(--gold); }
-  .skill:nth-child(3n+1) .name { color: var(--sapphire); }
-  .skill:nth-child(3n+2) .name { color: var(--emerald); }
-  .skill:nth-child(3n)   .name { color: #8a6a1c; }
+  .skill .used { color: var(--muted); font-size: 1rem; }
+  .skill .used b { color: #fff; }
+  .skill:nth-child(3n+1) { border-left-color: var(--violet); }
+  .skill:nth-child(3n+2) { border-left-color: var(--pink); }
+  .skill:nth-child(3n)   { border-left-color: var(--amber); }
+  .skill:nth-child(3n+1) .name { color: #a996ff; }
+  .skill:nth-child(3n+2) .name { color: #ff86b0; }
+  .skill:nth-child(3n)   .name { color: var(--amber); }
 
   /* How it connects */
   .steps { display: flex; align-items: center; justify-content: center; gap: 12px; flex-wrap: wrap; text-align: center; }
-  .step { background: rgba(255,255,255,.4); border: 1px solid var(--gold); border-radius: 12px; padding: 12px 14px; min-width: 130px; color: var(--ink); }
+  .step { background: var(--glass); border: 1px solid var(--line); border-radius: 16px; padding: 12px 16px; min-width: 130px; }
+  .step small { color: var(--muted); }
   .step .icon { font-size: 2rem; }
-  .arrow { color: var(--burgundy); font-size: 1.6rem; }
-  .explain { color: #4f3d28; text-align: center; margin: 14px 0 0; }
+  .arrow { font-size: 1.6rem; color: var(--pink); }
+  .explain { color: var(--muted); text-align: center; margin: 16px 0 0; }
 
   /* Footer */
-  .footer { color: var(--parchment-dark); font-size: .9rem; text-align: center; margin-top: 20px; }
-  .footer a { color: var(--gold-bright); }
-  #problem { color: #ffaa9a; }
+  .footer { color: var(--muted); font-size: .9rem; text-align: center; margin-top: 22px; }
+  .footer a { color: #c4b5ff; }
+  #problem { color: #ff8a9c; }
 </style>
 </head>
 <body>
@@ -349,7 +359,7 @@
 
   <!-- Pretend Arduino LED matrix -->
   <div class="board" id="board">
-    <div class="board-label">UNO R4 WiFi</div>
+    <div class="board-label">UNO R4 WIFI</div>
     <div class="matrix" id="matrix"></div>
   </div>
 
@@ -365,7 +375,7 @@
   <!-- Button key -->
   <div class="card">
     <h2>// THE BUTTON KEY</h2>
-    <p class="what">Each button is a piano key. Together, C, G and E make a happy chord, so every pattern sounds like a little song. Tap one to hear it!</p>
+    <p class="what">Each button is a piano key. Together, C, G and E make a happy chord, so every pattern sounds like a little song. <b>Tap one to hear it!</b></p>
     <div class="keyrow">
       <button class="gem red" data-i="0">
         <span class="shape">▼</span><span class="letter">A</span><span class="label">Red</span><span class="note">low · piano key C</span>
@@ -382,35 +392,10 @@
   <!-- Leaderboard -->
   <div class="card">
     <h2>// TOP GROUPS</h2>
-    <p class="what">Every score here came from the Arduino, through the internet. Can your group take the crown?</p>
+    <p class="what">Every score here came from the Arduino, through the internet. <b>Can your group take the crown?</b></p>
     <div class="beat">Record to beat: <b id="toBeat">0</b> <span class="who" id="toBeatWho"></span></div>
     <ol class="scores" id="scores"></ol>
     <div class="ladder" id="ladder"></div>
-  </div>
-
-  <!-- Why it's addictive -->
-  <div class="card">
-    <h2>// WHY IS THIS SO HARD TO STOP PLAYING?</h2>
-    <p class="what">This game uses real psychology. See if you noticed these while you played!</p>
-    <div class="facts">
-      <div class="fact">😩 <b>The near-miss effect:</b> losing by just a little makes your brain want to try again even more than winning. Slot machines use this on purpose.</div>
-      <div class="fact">🎯 <b>A goal you can see:</b> the progress bar shows exactly how close you are to the record, so you try harder.</div>
-      <div class="fact">🏅 <b>Status:</b> ranks like "Brain Beast" give you something to be proud of, and a next rank to chase.</div>
-      <div class="fact">👥 <b>Social comparison:</b> other groups are watching, and everyone wants to beat them.</div>
-      <div class="fact">📈 <b>Rising tension:</b> the screen heats up as you get closer to the record, and so does your heart rate.</div>
-      <div class="fact">🎉 <b>Big rewards:</b> when a group takes the crown, everyone watching wants that moment too.</div>
-    </div>
-  </div>
-
-  <!-- Did you know -->
-  <div class="card">
-    <h2>// DID YOU KNOW?</h2>
-    <p class="what">The brain science behind the colors and sounds.</p>
-    <div class="facts">
-      <div class="fact"><b>Synesthesia</b> is when one sense triggers another. Some people <b>see colors when they hear music</b>. In a room this size, someone here might have it!</div>
-      <div class="fact"><b>Seeing + hearing = better memory.</b> Each pattern is shown as a color <i>and</i> a note at the same time, so your brain stores it twice. That's why you can often "hum" the pattern back.</div>
-      <div class="fact"><b>Most people can hold only about 4 to 7 things</b> in their head at once. That's why scores usually get stuck around rounds 5 to 8. Try grouping the notes into little tunes to go further!</div>
-    </div>
   </div>
 
   <!-- About the maker -->
@@ -426,7 +411,7 @@
       <div class="love">
         <div class="icon">📚</div>
         <div class="name">Reading</div>
-        <div class="how">The design looks like the pages of a fantasy book, with gold trim, parchment and candlelight.</div>
+        <div class="how">Like a great book, every round adds to the story, and you never know what comes next.</div>
       </div>
       <div class="love">
         <div class="icon">💪</div>
@@ -616,14 +601,14 @@ document.addEventListener("keydown", (e) => {
 });
 
 /* =====================================================================
-   RANKS (gym themed)
+   LEVELS: Easy 0-4, Medium 5-9, Hard 10-14, Expert 15-19, Legend 20+
    ===================================================================== */
 const RANKS = [
-  { min: 0, name: "Warm-Up",       icon: "🧘", color: "#8a7350" },
-  { min: 3, name: "Rep Rookie",    icon: "💪", color: "#1f6b4a" },
-  { min: 5, name: "Memory Lifter", icon: "🏋️", color: "#1e4fd1" },
-  { min: 7, name: "Brain Beast",   icon: "🔥", color: "#7a1f2b" },
-  { min: 9, name: "Legend",        icon: "👑", color: "#a67c00" }
+  { min: 0,  name: "Easy",   icon: "🌱", color: "#1fae7a" },
+  { min: 5,  name: "Medium", icon: "⭐", color: "#2f8fe0" },
+  { min: 10, name: "Hard",   icon: "🔥", color: "#7c5cff" },
+  { min: 15, name: "Expert", icon: "⚡", color: "#e8457f" },
+  { min: 20, name: "Legend", icon: "👑", color: "#d9a520" }
 ];
 function rankFor(score) {
   let r = RANKS[0];
@@ -636,7 +621,6 @@ function nextRank(score) {
 function chipHTML(rank, extra = "") {
   return `<span class="rankchip" style="--rc:${rank.color}">${rank.icon} ${rank.name}${extra}</span>`;
 }
-// Draw the rank ladder
 document.getElementById("ladder").innerHTML = RANKS.map((r, i) => {
   const next = RANKS[i + 1];
   const range = next ? `${r.min}–${next.min - 1}` : `${r.min}+`;
@@ -820,7 +804,6 @@ function bestScore() {
 }
 
 function renderScores() {
-  // Each group's best score
   const bestByGroup = {};
   loadScores().forEach((s) => {
     const g = s.group || 0;
@@ -908,9 +891,8 @@ function showWaiting() {
   playCode([[1, 0]]);
 }
 
-// Updates the progress bar + heat for the round the players are on
 function updateProgress(n) {
-  const cleared = n - 1;            // rounds already beaten
+  const cleared = n - 1;
   const best = bestScore();
   let pct, text, heat;
 
@@ -952,7 +934,7 @@ function updateProgress(n) {
 
 function showRound(n) {
   clearTimeout(backTimer);
-  if (n === 1 && inGame) inGame = false;   // a brand-new game started
+  if (n === 1 && inGame) inGame = false;
   startGameIfNeeded();
 
   matrixEl.classList.remove("gold", "over");
@@ -967,7 +949,7 @@ function showRound(n) {
 
 function showGameOver(score) {
   clearTimeout(backTimer);
-  startGameIfNeeded();                    // in case a round message was missed
+  startGameIfNeeded();
   inGame = false;
   lastGameEnd = Date.now();
 
@@ -991,7 +973,6 @@ function showGameOver(score) {
   statusEl.textContent = "GAME OVER";
   subEl.innerHTML = `Group ${currentGroup} scored <b>${score}</b> ${score === 1 ? "round" : "rounds"} ${chipHTML(rank)}`;
 
-  // The psychology hooks
   const gap = prevBest - score;
   const next = nextRank(score);
   if (isBest) {
@@ -1051,7 +1032,7 @@ async function checkGame() {
       lastSeenId = data.id;
       const value = String(data.value);
 
-      if (firstLoad) {               // don't replay an old game when the page opens
+      if (firstLoad) {
         mailIcon.textContent = "📪";
         mailNews.textContent = "";
         showWaiting();
