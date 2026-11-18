@@ -260,19 +260,6 @@
   .ladder .rankchip { margin: 0; }
   .ladder .range { opacity: .85; font-weight: 400; }
 
-  /* About the maker */
-  .maker-hi { text-align: center; font-size: 1.15rem; margin: 0 0 16px; color: var(--muted); }
-  .maker-hi b { color: #fff; font-size: 1.3rem; }
-  .loves { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; }
-  .love { background: var(--glass); border: 1px solid var(--line); border-radius: 18px; padding: 16px; text-align: center; transition: transform .25s; }
-  .love:hover { transform: translateY(-3px); }
-  .love .icon { font-size: 2rem; }
-  .love .name { font-weight: 800; font-size: 1.1rem; }
-  .love:nth-child(1) .name { color: var(--violet); }
-  .love:nth-child(2) .name { color: var(--pink); }
-  .love:nth-child(3) .name { color: var(--amber); }
-  .love .how  { color: var(--muted); font-size: 1rem; }
-
   /* Live messages */
   .serial {
     background: #07061a; border: 1px solid var(--line); border-radius: 14px;
@@ -396,29 +383,6 @@
     <div class="beat">Record to beat: <b id="toBeat">0</b> <span class="who" id="toBeatWho"></span></div>
     <ol class="scores" id="scores"></ol>
     <div class="ladder" id="ladder"></div>
-  </div>
-
-  <!-- About the maker -->
-  <div class="card">
-    <h2>// ABOUT THE MAKER</h2>
-    <p class="maker-hi">Hi! I'm <b>Vivien</b>. I built <i>Play It Back</i> by mixing three things I love:</p>
-    <div class="loves">
-      <div class="love">
-        <div class="icon">🎵</div>
-        <div class="name">Music</div>
-        <div class="how">Every button is a piano key, and C, G and E make a happy chord, so every pattern is a little song.</div>
-      </div>
-      <div class="love">
-        <div class="icon">📚</div>
-        <div class="name">Reading</div>
-        <div class="how">Like a great book, every round adds to the story, and you never know what comes next.</div>
-      </div>
-      <div class="love">
-        <div class="icon">💪</div>
-        <div class="name">The Gym</div>
-        <div class="how">It's a workout for your memory: every round adds one more rep. Can you beat your personal record?</div>
-      </div>
-    </div>
   </div>
 
   <!-- 1. Live messages -->
