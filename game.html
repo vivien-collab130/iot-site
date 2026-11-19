@@ -432,6 +432,40 @@
   .resetbtn { display: block; margin: 22px auto 0; border-color: var(--rose); color: var(--rose-bright); background: rgba(232,160,180,.08); }
   .resetbtn:hover { background: var(--rose); color: var(--forest-deep); }
 
+  /* ============ WIDE SCREENS: two columns, less scrolling ============ */
+  .side-empty { display: none; }
+  @media (min-width: 1100px) {
+    body { padding-top: 14px; }
+    .wrap { max-width: 1320px; }
+    h1 { font-size: 3rem; margin: 0 0 2px; }
+    .tagline { margin-bottom: 2px; }
+    .soundhint { margin-bottom: 10px; }
+    .topbar { margin-bottom: 14px; }
+    .layout { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); gap: 28px; align-items: start; }
+    .col-side { position: sticky; top: 14px; }
+    .col-side .card { margin: 0 0 16px; padding: 20px 18px; }
+    .col-side .serial { max-height: 190px; min-height: 120px; }
+    .board { max-width: 370px; padding: 14px; margin-bottom: 10px; }
+    .matrix { gap: 5px; padding: 11px; }
+    .status { font-size: 1.75rem; margin-top: 6px; }
+    .sub { margin-bottom: 10px; }
+    .namebar { flex-wrap: nowrap; margin-bottom: 8px; }
+    .namebar input { flex: 1 1 auto; min-width: 0; font-size: 1rem; padding: 9px 16px; }
+    .namebar .pill { padding: 9px 16px; white-space: nowrap; }
+    .nextup { margin-bottom: 6px; }
+    .progress { margin-bottom: 10px; }
+    .callout { margin-bottom: 10px; }
+    .howto { margin-bottom: 6px; }
+    .stage .keyrow { gap: 12px; }
+    .gem { width: 124px; padding: 10px 6px; }
+    .gem .letter { font-size: 2rem; }
+    .extras { display: grid; grid-template-columns: 1fr 1fr; gap: 0 22px; align-items: start; margin-top: 10px; }
+    .extras .card { margin: 0 0 18px; }
+    .extras .wide { grid-column: 1 / -1; }
+    .side-empty { display: block; text-align: center; color: var(--muted); padding: 26px 16px; }
+    .replay.show ~ .side-empty { display: none; }
+  }
+
   /* ============ CONCERT MODE: big-screen spotlight ============ */
   body.concert .card:not(.concert-keep),
   body.concert .tagline,
@@ -451,6 +485,11 @@
   body.concert .callout { font-size: clamp(1.6rem, 4vw, 2.4rem); }
   body.concert .note { width: 64px; height: 64px; font-size: 1.2rem; }
   body.concert .verdict { font-size: 1.7rem; }
+  @media (min-width: 1100px) {
+    body.concert .wrap { max-width: 1400px; }
+    body.concert .layout { grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr); }
+    body.concert .board { max-width: 600px; }
+  }
   body.concert .gem { width: 190px; padding: 20px 10px; }
   body.concert .gem .letter { font-size: 3.2rem; }
   body.concert .gem .label { font-size: 1.4rem; }
@@ -482,6 +521,9 @@
   <div class="topbar">
     <button class="pill" id="concertBtn">🌙 Concert Mode</button>
   </div>
+
+  <div class="layout">
+  <div class="col-game">
 
   <!-- Pretend Arduino LED matrix -->
   <div class="board" id="board">
@@ -522,6 +564,9 @@
     <p class="howto">🎵 <b>How to play together:</b> one person presses the buttons on the Arduino. Everyone else helps by calling out the colors!</p>
   </div>
 
+  </div><!-- /col-game -->
+  <div class="col-side">
+
   <!-- Instant replay (appears after GAME OVER) -->
   <div class="card replay concert-keep" id="replay">
     <h2>🎬 INSTANT REPLAY</h2>
@@ -547,6 +592,10 @@
     <div class="serial" id="serial"><div class="empty">Waiting for the first message...</div></div>
   </div>
 
+  </div><!-- /col-side -->
+  </div><!-- /layout -->
+
+  <div class="extras">
   <!-- 2. Code -->
   <div class="card">
     <h2>2. THE CODE RUNNING RIGHT NOW</h2>
@@ -569,7 +618,7 @@
   </div>
 
   <!-- What I learned -->
-  <div class="card">
+  <div class="card wide">
     <h2>WHAT I LEARNED BUILDING THIS</h2>
     <p class="what">Everything I learned in this workshop, and where it shows up in this game.</p>
     <div class="learned">
@@ -585,7 +634,7 @@
   </div>
 
   <!-- How it works -->
-  <div class="card">
+  <div class="card wide">
     <h2>HOW IT ALL CONNECTS</h2>
     <div class="steps">
       <div class="step"><div class="icon">🤖</div>Arduino<br><small>sends the score</small></div>
@@ -596,6 +645,8 @@
     </div>
     <p class="explain">This is how smart doorbells, fitness trackers and phone apps work: a small computer sends a message to the cloud, and an app checks for it.</p>
   </div>
+
+  </div><!-- /extras -->
 
   <div class="footer">
     Adafruit IO user: <span id="whoami">?</span> &nbsp;|&nbsp;
