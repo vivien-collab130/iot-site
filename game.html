@@ -31,7 +31,6 @@
   }
   * { box-sizing: border-box; }
 
-  /* Deep forest with moonlight from above and a rose glow in the corner */
   body {
     margin: 0; padding: 22px 16px 44px;
     font-family: var(--font);
@@ -86,9 +85,8 @@
     opacity: 0; transition: opacity 1.2s ease;
   }
 
-  .wrap { max-width: 780px; margin: 0 auto; position: relative; z-index: 1; }
+  .wrap { max-width: 780px; margin: 0 auto; position: relative; z-index: 1; transition: max-width .4s; }
 
-  /* Gold-to-blush shimmering title */
   h1 {
     font-weight: 800;
     font-size: clamp(2.4rem, 8.5vw, 3.8rem);
@@ -103,10 +101,21 @@
   }
   @keyframes shimmer { to { background-position: 300% center; } }
   .tagline { text-align: center; color: var(--muted); font-size: 1.15rem; margin: 0 0 6px; }
-  .soundhint { text-align: center; color: var(--muted); font-size: .95rem; margin: 0 0 22px; }
+  .soundhint { text-align: center; color: var(--muted); font-size: .95rem; margin: 0 0 14px; }
   .soundhint.on { color: var(--sage); }
 
-  /* The Arduino board: dark forest with a sage-gold-rose ring */
+  /* Top bar + pill buttons */
+  .topbar { display: flex; justify-content: center; gap: 10px; margin: 0 0 20px; flex-wrap: wrap; }
+  .pill {
+    font-family: var(--font); font-size: 1rem; font-weight: 600;
+    padding: 10px 24px; border-radius: 999px; cursor: pointer;
+    border: 1px solid var(--gold); background: rgba(243,220,160,.08); color: var(--gold-bright);
+    transition: background .2s, color .2s, transform .1s;
+  }
+  .pill:hover { background: var(--gold); color: var(--forest-deep); }
+  .pill:active { transform: scale(.97); }
+
+  /* The Arduino board */
   .board {
     border: 2px solid transparent;
     background:
@@ -115,7 +124,7 @@
     border-radius: 24px; padding: 20px;
     margin: 0 auto 18px; max-width: 470px;
     box-shadow: 0 0 45px rgba(243,220,160,.18), 0 20px 40px rgba(0,0,0,.45);
-    transition: box-shadow 1s ease;
+    transition: box-shadow 1s ease, max-width .4s, padding .4s;
   }
   .board.hot { box-shadow: 0 0 60px rgba(232,160,180,.55), 0 0 120px rgba(243,220,160,.25), 0 20px 40px rgba(0,0,0,.45); }
   .board.pulse { animation: boardPulse .9s ease-in-out infinite alternate; }
@@ -129,7 +138,6 @@
   .matrix.over { animation: shake .4s; }
   @keyframes shake { 0%,100% { transform: translateX(0); } 25% { transform: translateX(-6px); } 75% { transform: translateX(6px); } }
 
-  /* Status text */
   .status {
     font-weight: 800; text-align: center;
     font-size: clamp(1.5rem, 5.5vw, 2.1rem);
@@ -139,8 +147,10 @@
   }
   .sub { text-align: center; color: var(--muted); font-size: 1.15rem; margin-bottom: 16px; }
   .sub b { color: var(--rose-bright); }
+  .recordline { display: none; text-align: center; font-size: 1.5rem; color: var(--muted); margin: 0 0 16px; }
+  .recordline b { color: var(--rose-bright); font-size: 2.3rem; text-shadow: 0 0 18px rgba(232,160,180,.5); }
 
-  /* Progress toward the record */
+  /* Progress */
   .progress { display: none; max-width: 520px; margin: 0 auto 16px; }
   .progress.show { display: block; }
   .bar { height: 16px; border-radius: 999px; overflow: hidden; background: rgba(247,239,226,.07); border: 1px solid var(--line); }
@@ -153,7 +163,6 @@
   }
   .ptext { text-align: center; margin-top: 8px; font-weight: 600; color: var(--gold-bright); font-size: 1.12rem; }
 
-  /* Callouts: SO CLOSE / TIED / NEW RECORD */
   .callout {
     display: none; text-align: center; font-weight: 800;
     font-size: clamp(1.2rem, 4.8vw, 1.6rem);
@@ -196,7 +205,32 @@
   }
   .crown-score { color: var(--text); font-size: 1.2rem; }
 
-  /* Panels: like leaves and soft castle stone */
+  /* Firefly burst (new record) */
+  .spark {
+    position: fixed; left: 50%; top: 42%; width: 9px; height: 9px; border-radius: 50%;
+    pointer-events: none; z-index: 15;
+    background: var(--sc); box-shadow: 0 0 10px var(--sc), 0 0 22px var(--sc);
+    animation: burst var(--dur) cubic-bezier(.15,.7,.3,1) forwards;
+  }
+  @keyframes burst {
+    0%   { transform: translate(-50%, -50%) scale(1.2); opacity: 1; }
+    80%  { opacity: .9; }
+    100% { transform: translate(calc(-50% + var(--dx)), calc(-50% + var(--dy))) scale(.3); opacity: 0; }
+  }
+
+  /* Round cleared toast */
+  .toast {
+    position: fixed; left: 50%; top: 20px; z-index: 20;
+    transform: translate(-50%, -40px); opacity: 0;
+    background: rgba(18,38,29,.94); border: 1px solid var(--gold);
+    color: var(--gold-bright); font-weight: 800; font-size: 1.1rem;
+    padding: 10px 24px; border-radius: 999px;
+    box-shadow: 0 0 30px rgba(243,220,160,.3);
+    transition: transform .4s cubic-bezier(.2,1.4,.4,1), opacity .4s;
+  }
+  .toast.show { transform: translate(-50%, 0); opacity: 1; }
+
+  /* Panels */
   .card {
     background: linear-gradient(180deg, rgba(247,239,226,.06), rgba(247,239,226,.02));
     border: 1px solid var(--line);
@@ -208,12 +242,45 @@
     box-shadow: inset 0 1px 0 rgba(243,220,160,.1), 0 18px 36px rgba(0,0,0,.35);
     transition: transform .25s, border-color .25s, box-shadow .25s;
   }
-  .card:hover { transform: translateY(-3px); border-color: rgba(232,160,180,.45); box-shadow: inset 0 1px 0 rgba(243,220,160,.15), 0 24px 46px rgba(0,0,0,.45), 0 0 30px rgba(232,160,180,.08); }
+  .card:hover { transform: translateY(-3px); border-color: rgba(232,160,180,.45); }
   .card h2 { font-weight: 800; font-size: .95rem; letter-spacing: 3px; text-align: center; margin: 0 0 6px; color: var(--gold-bright); }
   .card .what { color: var(--muted); text-align: center; margin: 0 0 18px; font-size: 1.05rem; }
   .card .what b { color: var(--text); }
 
-  /* Button key: glossy jewels with gold rims (same red / green / blue as the Arduino) */
+  /* Instant replay */
+  .replay { display: none; border-color: rgba(232,160,180,.5); }
+  .replay.show { display: block; }
+  .verdict { text-align: center; font-size: 1.25rem; font-weight: 600; margin: 0 0 4px; }
+  .verdict b { color: var(--rose-bright); }
+  .blame { text-align: center; color: var(--gold-bright); font-size: 1.1rem; margin: 0 0 18px; }
+  .notes { display: flex; flex-wrap: wrap; gap: 12px; justify-content: center; margin-bottom: 18px; }
+  .note {
+    position: relative; width: 48px; height: 48px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 800; color: #fff; font-size: .95rem;
+    background: var(--nc); opacity: .3; border: 2px solid rgba(255,255,255,.25);
+    transition: transform .15s, opacity .15s, box-shadow .15s;
+  }
+  .note.r { --nc: #d8304f; } .note.g { --nc: #22a86d; } .note.b { --nc: #3a6fe6; }
+  .note.done { opacity: .85; }
+  .note.on { opacity: 1; transform: scale(1.2); box-shadow: 0 0 18px var(--nc), 0 0 36px var(--nc); }
+  .note.miss { opacity: 1; outline: 3px dashed var(--rose-bright); outline-offset: 4px; }
+  .note.miss::after { content: "✖"; position: absolute; top: -16px; right: -12px; font-size: 1.1rem; color: var(--rose-bright); }
+  .replay .center { text-align: center; }
+
+  /* Roles */
+  .roles { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; }
+  .role { background: var(--glass); border: 1px solid var(--line-soft); border-radius: 16px; padding: 14px 10px; text-align: center; }
+  .role .icon { font-size: 2.2rem; }
+  .role .rname { font-weight: 800; font-size: 1.05rem; }
+  .role .rjob { color: var(--muted); font-size: .95rem; }
+  .role.p .rname { color: var(--gold-bright); }
+  .role.r .rname { color: #f0607e; }
+  .role.g .rname { color: #4fcf93; }
+  .role.b .rname { color: #6299f0; }
+  .roletip { text-align: center; color: var(--muted); font-size: .98rem; margin: 16px 0 0; }
+
+  /* Button key */
   .keyrow { display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; }
   .gem {
     width: 134px; padding: 14px 8px;
@@ -229,7 +296,7 @@
   .gem .shape  { font-size: 1.2rem; display: block; opacity: .95; }
   .gem .letter { font-size: 2.4rem; font-weight: 800; display: block; line-height: 1.1; text-shadow: 0 2px 6px rgba(0,0,0,.3); }
   .gem .label  { font-size: 1.1rem; font-weight: 600; display: block; }
-  .gem .note   { font-size: .9rem; display: block; opacity: .95; }
+  .gem .note2  { font-size: .9rem; display: block; opacity: .95; }
   .gem.red   { --gem: #b81c45; --gem-light: #f0607e; --gem-dark: #6e0f28; }
   .gem.green { --gem: #18875a; --gem-light: #4fcf93; --gem-dark: #0c4d33; }
   .gem.blue  { --gem: #2154b8; --gem-light: #6299f0; --gem-dark: #122f6b; }
@@ -239,7 +306,7 @@
     box-shadow: 0 2px 0 var(--gem-dark), 0 0 30px var(--gem-light), 0 0 60px var(--gem-light);
   }
 
-  /* Leaderboard + ranks */
+  /* Leaderboard */
   .beat { text-align: center; font-size: 1.15rem; margin-bottom: 14px; color: var(--muted); }
   .beat b { color: var(--rose-bright); font-weight: 800; font-size: 2.1rem; text-shadow: 0 0 18px rgba(232,160,180,.5); }
   .beat .who { color: var(--muted); font-size: 1rem; }
@@ -272,7 +339,7 @@
   }
   .serial .row { border-bottom: 1px dashed rgba(247,239,226,.07); padding: 5px 0; }
   .serial .t { color: #5f7a68; }
-  .serial .raw { color: var(--gold-bright); font-weight: 700; }
+  .serial .raw { color: var(--gold-bright); font-weight: 700; word-break: break-all; }
   .serial .plain { color: var(--text); font-family: var(--font); font-size: 1rem; display: block; padding-left: 12px; }
   .serial .empty { color: #5f7a68; }
 
@@ -323,24 +390,38 @@
   .arrow { font-size: 1.6rem; color: var(--rose); }
   .explain { color: var(--muted); text-align: center; margin: 16px 0 0; }
 
-  /* Footer + reset button */
+  /* Footer */
   .footer { color: var(--muted); font-size: .9rem; text-align: center; margin-top: 22px; }
   .footer a { color: var(--gold); }
   #problem { color: #f4a3a3; }
-  .resetbtn {
-    display: block; margin: 22px auto 0; padding: 12px 30px;
-    font-family: var(--font); font-size: 1rem; font-weight: 600;
-    color: var(--rose-bright); cursor: pointer;
-    border: 1px solid var(--rose); border-radius: 999px;
-    background: rgba(232,160,180,.08);
-    transition: background .2s, color .2s, transform .1s;
-  }
+  .resetbtn { display: block; margin: 22px auto 0; border-color: var(--rose); color: var(--rose-bright); background: rgba(232,160,180,.08); }
   .resetbtn:hover { background: var(--rose); color: var(--forest-deep); }
-  .resetbtn:active { transform: scale(.97); }
+
+  /* ============ CONCERT MODE: big-screen spotlight ============ */
+  body.concert .card:not(.concert-keep),
+  body.concert .tagline,
+  body.concert .soundhint,
+  body.concert .footer { display: none; }
+  body.concert .wrap { max-width: 1100px; }
+  body.concert::after { background: radial-gradient(ellipse 45% 55% at 50% 38%, rgba(243,220,160,.16), transparent 70%); }
+  body.concert h1 { font-size: clamp(2.6rem, 6vw, 4.4rem); }
+  body.concert .board { max-width: 600px; padding: 26px; }
+  body.concert .matrix { gap: 8px; padding: 18px; }
+  body.concert .status { font-size: clamp(2.2rem, 6vw, 3.8rem); }
+  body.concert .sub { font-size: 1.5rem; }
+  body.concert .recordline { display: block; }
+  body.concert .progress { max-width: 760px; }
+  body.concert .bar { height: 26px; }
+  body.concert .ptext { font-size: 1.5rem; }
+  body.concert .callout { font-size: clamp(1.6rem, 4vw, 2.4rem); }
+  body.concert .note { width: 64px; height: 64px; font-size: 1.2rem; }
+  body.concert .verdict { font-size: 1.7rem; }
+  body.concert .blame { font-size: 1.4rem; }
 </style>
 </head>
 <body>
 <div class="heat" id="heat"></div>
+<div class="toast" id="toast"></div>
 
 <!-- Crown takeover (shows on a new record) -->
 <div class="crown" id="crown">
@@ -355,8 +436,12 @@
 <div class="wrap">
 
   <h1>Play It Back</h1>
-  <p class="tagline">Watch the lights. Listen to the notes. Play it back.</p>
+  <p class="tagline">Watch the lights. Listen to the notes. Play it back, together.</p>
   <p class="soundhint" id="soundHint">🔊 Tap anywhere once to wake the sound.</p>
+
+  <div class="topbar">
+    <button class="pill" id="concertBtn">🌙 Concert Mode</button>
+  </div>
 
   <!-- Pretend Arduino LED matrix -->
   <div class="board" id="board">
@@ -366,6 +451,7 @@
 
   <div class="status" id="status">Connecting...</div>
   <div class="sub" id="sub"></div>
+  <div class="recordline" id="recordline"></div>
 
   <div class="progress" id="progress">
     <div class="bar"><div class="fill" id="fill"></div></div>
@@ -373,27 +459,49 @@
   </div>
   <div class="callout" id="callout"></div>
 
+  <!-- Instant replay (appears after GAME OVER) -->
+  <div class="card replay concert-keep" id="replay">
+    <h2>🎬 INSTANT REPLAY</h2>
+    <p class="verdict" id="verdict"></p>
+    <p class="blame" id="blame"></p>
+    <div class="notes" id="notes"></div>
+    <div class="center"><button class="pill" id="replayBtn">▶ Replay the song</button></div>
+  </div>
+
+  <!-- Roles -->
+  <div class="card">
+    <h2>🎼 PLAY AS A BAND</h2>
+    <p class="what">Pick your roles before you start. Only the Pianist touches the buttons. <b>Everyone else calls out their color!</b></p>
+    <div class="roles">
+      <div class="role p"><div class="icon">🎹</div><div class="rname">The Pianist</div><div class="rjob">Listens to the band and presses the buttons</div></div>
+      <div class="role r"><div class="icon">🔴</div><div class="rname">Red Caller</div><div class="rjob">Shouts "RED!" for every red</div></div>
+      <div class="role g"><div class="icon">🟢</div><div class="rname">Green Caller</div><div class="rjob">Shouts "GREEN!" for every green</div></div>
+      <div class="role b"><div class="icon">🔵</div><div class="rname">Blue Caller</div><div class="rjob">Shouts "BLUE!" for every blue</div></div>
+    </div>
+    <p class="roletip">Extra people? Become Memory Coaches and help the band remember the song. Swap the Pianist each game!</p>
+  </div>
+
   <!-- Button key -->
   <div class="card">
     <h2>THE BUTTON KEY</h2>
     <p class="what">Each button is a piano key. Together, C, G and E make a happy chord, so every pattern sounds like a little song. <b>Tap one to hear it!</b></p>
     <div class="keyrow">
       <button class="gem red" data-i="0">
-        <span class="shape">▼</span><span class="letter">A</span><span class="label">Red</span><span class="note">low · piano key C</span>
+        <span class="shape">▼</span><span class="letter">A</span><span class="label">Red</span><span class="note2">low · piano key C</span>
       </button>
       <button class="gem green" data-i="1">
-        <span class="shape">◆</span><span class="letter">B</span><span class="label">Green</span><span class="note">middle · piano key G</span>
+        <span class="shape">◆</span><span class="letter">B</span><span class="label">Green</span><span class="note2">middle · piano key G</span>
       </button>
       <button class="gem blue" data-i="2">
-        <span class="shape">▲</span><span class="letter">C</span><span class="label">Blue</span><span class="note">high · piano key E</span>
+        <span class="shape">▲</span><span class="letter">C</span><span class="label">Blue</span><span class="note2">high · piano key E</span>
       </button>
     </div>
   </div>
 
   <!-- Leaderboard -->
-  <div class="card">
+  <div class="card concert-keep" id="leaderCard">
     <h2>TOP GROUPS</h2>
-    <p class="what">Every score here came from the Arduino, through the internet. <b>Can your group take the crown?</b></p>
+    <p class="what">Every score here came from the Arduino, through the internet. <b>Can your band take the crown?</b></p>
     <div class="beat">Record to beat: <b id="toBeat">0</b> <span class="who" id="toBeatWho"></span></div>
     <ol class="scores" id="scores"></ol>
     <div class="ladder" id="ladder"></div>
@@ -432,38 +540,14 @@
     <h2>WHAT I LEARNED BUILDING THIS</h2>
     <p class="what">Everything I learned in this workshop, and where it shows up in this game.</p>
     <div class="learned">
-      <div class="skill">
-        <div class="name">📬 Feeds</div>
-        <div class="used">A feed is a mailbox in the cloud. The <b>game</b> feed carries every round and score.</div>
-      </div>
-      <div class="skill">
-        <div class="name">🛎️ Arduino → Website</div>
-        <div class="used">My Doorbell project sent button presses to a website. Here, the Arduino sends scores.</div>
-      </div>
-      <div class="skill">
-        <div class="name">💡 Website → Arduino</div>
-        <div class="used">My Remote Lamp project let a phone change real lights and play music.</div>
-      </div>
-      <div class="skill">
-        <div class="name">🔁 Polling vs. Subscribing</div>
-        <div class="used">This screen <b>polls</b>: it checks every 2 seconds. My Lamp <b>subscribed</b>: messages were pushed to it.</div>
-      </div>
-      <div class="skill">
-        <div class="name">🚦 Rate Limits</div>
-        <div class="used">Adafruit IO allows 30 messages a minute, so the Arduino waits 2 seconds between messages.</div>
-      </div>
-      <div class="skill">
-        <div class="name">🔐 Keeping Secrets Safe</div>
-        <div class="used">My key is never in the code or on GitHub. It stays in a secrets file on my computer.</div>
-      </div>
-      <div class="skill">
-        <div class="name">🌐 Publishing a Website</div>
-        <div class="used">This page is live on the internet with GitHub Pages, so anyone with the link can see it.</div>
-      </div>
-      <div class="skill">
-        <div class="name">🐞 Debugging</div>
-        <div class="used">If something breaks, I check the feed: if the message is there, the bug is in the website. If not, it's in the Arduino.</div>
-      </div>
+      <div class="skill"><div class="name">📬 Feeds</div><div class="used">A feed is a mailbox in the cloud. The <b>game</b> feed carries every round and score.</div></div>
+      <div class="skill"><div class="name">🛎️ Arduino → Website</div><div class="used">My Doorbell project sent button presses to a website. Here, the Arduino sends scores.</div></div>
+      <div class="skill"><div class="name">💡 Website → Arduino</div><div class="used">My Remote Lamp project let a phone change real lights and play music.</div></div>
+      <div class="skill"><div class="name">🔁 Polling vs. Subscribing</div><div class="used">This screen <b>polls</b>: it checks every 2 seconds. My Lamp <b>subscribed</b>: messages were pushed to it.</div></div>
+      <div class="skill"><div class="name">🚦 Rate Limits</div><div class="used">Adafruit IO allows 30 messages a minute, so the Arduino waits 2 seconds between messages.</div></div>
+      <div class="skill"><div class="name">🔐 Keeping Secrets Safe</div><div class="used">My key is never in the code or on GitHub. It stays in a secrets file on my computer.</div></div>
+      <div class="skill"><div class="name">🌐 Publishing a Website</div><div class="used">This page is live on the internet with GitHub Pages, so anyone with the link can see it.</div></div>
+      <div class="skill"><div class="name">🐞 Debugging</div><div class="used">If something breaks, I check the feed: if the message is there, the bug is in the website. If not, it's in the Arduino.</div></div>
     </div>
   </div>
 
@@ -485,7 +569,7 @@
     <a href="#" id="changeKey">change key</a> &nbsp;|&nbsp;
     <a href="#" id="nextGroup">next group</a>
     <div id="problem"></div>
-    <button class="resetbtn" id="resetAll">↺ Reset all teams</button>
+    <button class="pill resetbtn" id="resetAll">↺ Reset all teams</button>
   </div>
 
 </div>
@@ -495,7 +579,7 @@
 const IO_USERNAME       = "eagle_vivien";   // your Adafruit IO username
 const GAME_FEED         = "game";           // the feed the Arduino sends to
 const POLL_MS           = 2000;             // check every 2 seconds. Keep >= 2000.
-const BACK_TO_GO_MS     = 10000;            // after GAME OVER, go back to GO after this long
+const BACK_TO_GO_MS     = 12000;            // after GAME OVER, go back to GO after this long
 const NEW_GROUP_GAP_MS  = 30000;            // a game starting 30+ seconds after the last one = a new group
 
 /* ---------- KEY (stays in this browser only, never in this file) ---------- */
@@ -550,15 +634,21 @@ function playTone(freq, ms, type = "triangle", vol = 0.2, delayMs = 0) {
 }
 
 function soundRound()    { playTone(880, 120, "sine", 0.12); }
+function soundCleared()  { playTone(784, 110, "triangle", 0.12); playTone(1047, 160, "triangle", 0.12, 110); }
 function soundClose()    { playTone(660, 140, "triangle", 0.15); playTone(880, 200, "triangle", 0.15, 150); }
 function soundGameOver() { playTone(220, 300, "sawtooth", 0.1); playTone(150, 600, "sawtooth", 0.1, 320); }
 function soundFanfare()  { [523, 659, 784, 1047, 1319].forEach((f, i) => playTone(f, 260, "triangle", 0.18, i * 160)); }
+function soundMiss()     { playTone(140, 380, "sawtooth", 0.12); }
 
 /* =====================================================================
    THE BUTTON KEY - tap a button (or press A / B / C) to hear its note
    Same piano keys as the Arduino: A = C (262), B = G (392), C = E (659)
    ===================================================================== */
-const NOTES = [262, 392, 659];
+const NOTES  = [262, 392, 659];
+const CNAME  = ["RED", "GREEN", "BLUE"];
+const CNICE  = ["Red", "Green", "Blue"];
+const CEMOJI = ["🔴", "🟢", "🔵"];
+const CCLASS = ["r", "g", "b"];
 const gems = document.querySelectorAll(".gem");
 
 function ringGem(i) {
@@ -662,6 +752,117 @@ function setHeat(h) {
 }
 
 /* =====================================================================
+   CELEBRATIONS - round toast + firefly burst
+   ===================================================================== */
+const toastEl = document.getElementById("toast");
+let toastTimer = null;
+function showToast(text) {
+  toastEl.textContent = text;
+  toastEl.classList.add("show");
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => toastEl.classList.remove("show"), 1800);
+}
+
+function fireflyBurst(count = 70) {
+  const colors = ["#f3dca0", "#ffe9b0", "#f6c1d0", "#e8a0b4", "#d6f0aa", "#ffffff"];
+  for (let i = 0; i < count; i++) {
+    const s = document.createElement("div");
+    s.className = "spark";
+    const angle = Math.random() * Math.PI * 2;
+    const dist = 140 + Math.random() * Math.min(window.innerWidth, 900) * 0.45;
+    s.style.setProperty("--dx", Math.cos(angle) * dist + "px");
+    s.style.setProperty("--dy", Math.sin(angle) * dist + "px");
+    s.style.setProperty("--sc", colors[i % colors.length]);
+    s.style.setProperty("--dur", (1.4 + Math.random() * 1.4) + "s");
+    const size = 5 + Math.random() * 8;
+    s.style.width = size + "px";
+    s.style.height = size + "px";
+    document.body.appendChild(s);
+    setTimeout(() => s.remove(), 3000);
+  }
+}
+
+/* =====================================================================
+   INSTANT REPLAY - replays the song and shows the wrong note
+   ===================================================================== */
+const replayEl  = document.getElementById("replay");
+const notesEl   = document.getElementById("notes");
+const verdictEl = document.getElementById("verdict");
+const blameEl   = document.getElementById("blame");
+let replayData = null;
+let replayTimers = [];
+
+function hideReplay() {
+  replayTimers.forEach(t => clearTimeout(t));
+  replayTimers = [];
+  replayEl.classList.remove("show");
+  replayData = null;
+}
+
+function showReplay(seq, fail, pressed) {
+  if (!seq || isNaN(fail) || fail < 0 || fail >= seq.length) { hideReplay(); return; }
+  replayData = { seq, fail, pressed };
+
+  const want = Number(seq[fail]);
+  if (pressed === "x") {
+    verdictEl.innerHTML = `${CEMOJI[want]} Too slow! Note ${fail + 1} needed <b>${CNAME[want]}</b>.`;
+  } else {
+    const got = Number(pressed);
+    verdictEl.innerHTML = `${CEMOJI[want]} Note ${fail + 1} needed <b>${CNAME[want]}</b>, but the Pianist pressed ${CEMOJI[got]} <b>${CNAME[got]}</b>.`;
+  }
+  blameEl.textContent = `${CNICE[want]} Caller, that was your cue! 😄`;
+
+  notesEl.innerHTML = "";
+  for (let i = 0; i < seq.length; i++) {
+    const c = Number(seq[i]);
+    const n = document.createElement("div");
+    n.className = "note " + CCLASS[c];
+    n.textContent = i + 1;
+    notesEl.appendChild(n);
+  }
+  replayEl.classList.add("show");
+  replayTimers.push(setTimeout(playReplay, 1800));
+}
+
+function playReplay() {
+  if (!replayData) return;
+  replayTimers.forEach(t => clearTimeout(t));
+  replayTimers = [];
+  const { seq, fail } = replayData;
+  const els = notesEl.querySelectorAll(".note");
+  els.forEach(n => n.classList.remove("on", "done", "miss"));
+  const STEP = 520;
+  for (let i = 0; i <= fail; i++) {
+    replayTimers.push(setTimeout(() => {
+      els[i].classList.add("on");
+      if (i === fail) {
+        soundMiss();
+        els[i].classList.add("miss");
+      } else {
+        playTone(NOTES[Number(seq[i])], 380, "triangle", 0.22);
+      }
+    }, i * STEP));
+    if (i !== fail) {
+      replayTimers.push(setTimeout(() => {
+        els[i].classList.remove("on");
+        els[i].classList.add("done");
+      }, i * STEP + 380));
+    }
+  }
+}
+document.getElementById("replayBtn").onclick = () => { wakeSound(); playReplay(); };
+
+/* =====================================================================
+   CONCERT MODE - big-screen spotlight view
+   ===================================================================== */
+const concertBtn = document.getElementById("concertBtn");
+concertBtn.onclick = () => {
+  const on = document.body.classList.toggle("concert");
+  concertBtn.textContent = on ? "✕ Exit Concert Mode" : "🌙 Concert Mode";
+  window.scrollTo({ top: 0, behavior: "smooth" });
+};
+
+/* =====================================================================
    1. LIVE MESSAGES (looks like the Arduino Serial Monitor)
    ===================================================================== */
 const serialEl = document.getElementById("serial");
@@ -701,15 +902,15 @@ const CODE = [
   { html: '  <span class="fn">flashColor</span>(sequence[s]);   <span class="cm">// show the pattern</span>',
     explain: "The Arduino <b>flashes each color and plays its piano key</b> so players can memorize the pattern." },
   { html: '  <span class="kw">int</span> p = <span class="fn">waitForPress</span>(5000); <span class="cm">// players\' turn</span>',
-    explain: "Now it's the <b>players' turn</b>. The Arduino waits up to 5 seconds for each button press." },
-  { html: '  <span class="kw">if</span> (p != sequence[s]) <span class="fn">gameOver</span>(score);',
-    explain: "An <b>if statement</b> checks: did they press the right button? If not, it's game over!" },
+    explain: "Now it's the <b>band's turn</b>. The Arduino waits up to 5 seconds for each button press." },
+  { html: '  <span class="kw">if</span> (p != sequence[s]) <span class="fn">gameOver</span>(score, s, p);',
+    explain: "An <b>if statement</b> checks: did the Pianist press the right button? If not, it's game over!" },
   { html: '}', explain: "" },
   { html: '', explain: "" },
-  { html: '<span class="kw">void</span> <span class="fn">gameOver</span>(<span class="kw">int</span> score) {',
-    explain: "<b>gameOver()</b> runs when a player makes a mistake. It takes the <b>score</b> as its input." },
-  { html: '  <span class="fn">sendStatus</span>(<span class="kw">"over:"</span> + score);  <span class="cm">// send the score</span>',
-    explain: "This line <b>sends the final score through the internet</b> to the leaderboard." },
+  { html: '<span class="kw">void</span> <span class="fn">gameOver</span>(<span class="kw">int</span> score, <span class="kw">int</span> fail, <span class="kw">int</span> pressed) {',
+    explain: "<b>gameOver()</b> runs when the band makes a mistake. It gets the <b>score</b>, <b>which note</b> was wrong, and <b>what was pressed</b>." },
+  { html: '  <span class="fn">sendStatus</span>(<span class="kw">"over:"</span> + score + <span class="kw">":"</span> + song);  <span class="cm">// for the replay</span>',
+    explain: "This line sends the <b>score and the whole song</b> through the internet, so this screen can show the instant replay." },
   { html: '}', explain: "" }
 ];
 
@@ -781,6 +982,7 @@ function bestScore() {
   return b ? b.score : 0;
 }
 
+const recordEl = document.getElementById("recordline");
 function renderScores() {
   const bestByGroup = {};
   loadScores().forEach((s) => {
@@ -792,7 +994,7 @@ function renderScores() {
   const ol = document.getElementById("scores");
   ol.innerHTML = "";
   if (rows.length === 0) {
-    ol.innerHTML = '<li class="empty">No games yet. Be the first group to set the record!</li>';
+    ol.innerHTML = '<li class="empty">No games yet. Be the first band to set the record!</li>';
   } else {
     rows.forEach((s) => {
       const li = document.createElement("li");
@@ -804,6 +1006,9 @@ function renderScores() {
   const best = bestEntry();
   document.getElementById("toBeat").textContent = best ? best.score : 0;
   document.getElementById("toBeatWho").textContent = best ? `(held by Group ${best.group})` : "";
+  recordEl.innerHTML = best
+    ? `👑 Record: <b>${best.score}</b> rounds · Group ${best.group}`
+    : `👑 No record yet. Be the first!`;
 }
 
 document.getElementById("nextGroup").onclick = (e) => {
@@ -850,11 +1055,11 @@ function showWaiting() {
   hideCallout();
   setHeat(0);
   drawText("GO");
-  statusEl.textContent = "Press any button to play!";
+  statusEl.textContent = "Pick your Pianist, then press any button!";
   const best = bestEntry();
   subEl.textContent = best
-    ? `Record to beat: ${best.score} rounds (Group ${best.group}). Can you take the crown?`
-    : "No record yet. Be the first group to set one!";
+    ? `Record to beat: ${best.score} rounds (Group ${best.group}). Can your band take the crown?`
+    : "No record yet. Be the first band to set one!";
   playCode([[1, 0]]);
 }
 
@@ -903,18 +1108,24 @@ function showRound(n) {
   clearTimeout(backTimer);
   if (n === 1 && inGame) inGame = false;
   startGameIfNeeded();
+  hideReplay();
 
   matrixEl.classList.remove("gold", "over");
   hideCallout();
   drawText(n);
   statusEl.textContent = "ROUND " + n;
-  subEl.textContent = `Group ${currentGroup} · Watch the pattern... then play it back!`;
-  soundRound();
+  subEl.textContent = `Group ${currentGroup} · Watch the lights... then play it back!`;
+  if (n > 1) {
+    showToast(`✨ Round ${n - 1} cleared!`);
+    soundCleared();
+  } else {
+    soundRound();
+  }
   updateProgress(n);
   playCode([[6, 0], [7, 900], [8, 1900], [9, 3600]]);
 }
 
-function showGameOver(score) {
+function showGameOver(score, seq, fail, pressed) {
   clearTimeout(backTimer);
   startGameIfNeeded();
   inGame = false;
@@ -945,6 +1156,8 @@ function showGameOver(score) {
   if (isBest) {
     showCallout("👑 NEW RECORD!");
     showCrown(currentGroup, score);
+    fireflyBurst();
+    setTimeout(() => fireflyBurst(50), 900);
     soundGameOver();
     setTimeout(soundFanfare, 900);
   } else if (score > 0 && gap === 0) {
@@ -962,12 +1175,17 @@ function showGameOver(score) {
     soundGameOver();
   }
 
-  playCode([[10, 0], [14, 1400]]);
+  // Instant replay (starts after the crown or game-over sounds)
+  showReplay(seq, fail, pressed);
+
+  playCode([[10, 0], [13, 1400], [14, 2600]]);
   backTimer = setTimeout(showWaiting, BACK_TO_GO_MS);
 }
 
 /* =====================================================================
    3. CHECK THE MAILBOX (polling) every POLL_MS
+   Messages look like:  "round:3"   or   "over:7:01201020:4:1"
+   (over : score : the song : which note was wrong : what was pressed)
    ===================================================================== */
 let lastSeenId = null;
 let checks = 0;
@@ -997,35 +1215,41 @@ async function checkGame() {
     if (data.id !== lastSeenId) {
       const firstLoad = (lastSeenId === null);
       lastSeenId = data.id;
-      const value = String(data.value);
-
-      if (firstLoad) {
-        mailIcon.textContent = "📪";
-        mailNews.textContent = "";
-        showWaiting();
-        return;
-      }
-
-      mailIcon.textContent = "📬";
-      mailNews.innerHTML = '<span class="newmail">New mail!</span>';
-
-      if (value.startsWith("round:")) {
-        const n = parseInt(value.slice(6)) || 0;
-        logMessage(value, `Round ${n} started. The Arduino is showing the pattern.`);
-        showRound(n);
-      } else if (value.startsWith("over:")) {
-        const n = parseInt(value.slice(5)) || 0;
-        logMessage(value, `Game over! Final score: ${n}. Sent to the leaderboard.`);
-        showGameOver(n);
-      } else {
-        logMessage(value, "A message the game doesn't use.");
-      }
+      handleMessage(String(data.value), firstLoad);
     } else {
       mailIcon.textContent = "📪";
       mailNews.textContent = "Nothing new.";
     }
   } catch (err) {
     problemEl.textContent = "Could not reach Adafruit IO: " + err.message;
+  }
+}
+
+function handleMessage(value, firstLoad) {
+  if (firstLoad) {               // don't replay an old game when the page opens
+    mailIcon.textContent = "📪";
+    mailNews.textContent = "";
+    showWaiting();
+    return;
+  }
+
+  mailIcon.textContent = "📬";
+  mailNews.innerHTML = '<span class="newmail">New mail!</span>';
+
+  if (value.startsWith("round:")) {
+    const n = parseInt(value.slice(6)) || 0;
+    logMessage(value, `Round ${n} started. The Arduino is showing the pattern.`);
+    showRound(n);
+  } else if (value.startsWith("over:")) {
+    const parts = value.split(":");
+    const n = parseInt(parts[1]) || 0;
+    const seq = parts[2] || "";
+    const fail = parseInt(parts[3]);
+    const pressed = parts[4] || "x";
+    logMessage(value, `Game over! Score: ${n}. The song and the wrong note were sent for the instant replay.`);
+    showGameOver(n, seq, fail, pressed);
+  } else {
+    logMessage(value, "A message the game doesn't use.");
   }
 }
 
@@ -1043,6 +1267,7 @@ document.getElementById("resetAll").onclick = () => {
   forceNewGroup = false;
   clearTimeout(crownTimer);
   crownEl.classList.remove("show");
+  hideReplay();
   serialEl.innerHTML = '<div class="empty">Waiting for the first message...</div>';
   serialStarted = false;
   renderScores();
