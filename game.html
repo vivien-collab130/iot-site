@@ -287,6 +287,13 @@
   .howto b { color: var(--gold-bright); }
   .gem.watch { transform: translateY(6px) scale(1.08); box-shadow: 0 2px 0 var(--gem-dark), 0 0 34px var(--gem-light), 0 0 70px var(--gem-light); filter: brightness(1.25); }
 
+  /* Rhythm dots: show HOW MANY notes, never which colors */
+  .pdots { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; min-height: 26px; margin: 2px 0 16px; }
+  .pdot { width: 20px; height: 20px; border-radius: 50%; background: rgba(243,220,160,.18); border: 1px solid rgba(243,220,160,.4); transition: transform .12s, background .12s, box-shadow .12s; }
+  .pdot.on { background: var(--gold-bright); transform: scale(1.35); box-shadow: 0 0 14px var(--gold-bright), 0 0 28px rgba(243,220,160,.6); }
+  .pdot.done { background: rgba(243,220,160,.55); }
+  body.concert .pdot { width: 30px; height: 30px; }
+
   /* Button key */
   .keyrow { display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; }
   .gem {
@@ -463,6 +470,7 @@
   <div class="status" id="status">Connecting...</div>
   <div class="sub" id="sub"></div>
   <div class="recordline" id="recordline"></div>
+  <div class="pdots" id="pdots"></div>
 
   <div class="progress" id="progress">
     <div class="bar"><div class="fill" id="fill"></div></div>
@@ -802,17 +810,19 @@ function pick(list, key) {
 let patternTimers = [];
 function stepMs(len) { return len <= 3 ? 650 : Math.max(220, 520 - len * 20); }   // same as the Arduino
 
+const pdotsEl = document.getElementById("pdots");
 function clearPattern() {
   patternTimers.forEach(t => clearTimeout(t));
   patternTimers = [];
-  gems.forEach(g => g.classList.remove("watch"));
+  pdotsEl.innerHTML = "";
 }
 
-function lightGem(i, ms) {
-  const g = gems[i];
-  g.classList.add("watch");
-  playTone(NOTES[i], ms, "triangle", 0.12);
-  setTimeout(() => g.classList.remove("watch"), ms);
+// Pulses one plain gold dot. No color and no sound, so the screen never gives away the answer.
+function pulseDot(i, ms) {
+  const d = pdotsEl.children[i];
+  if (!d) return;
+  d.classList.add("on");
+  setTimeout(() => { d.classList.remove("on"); d.classList.add("done"); }, ms);
 }
 
 function schedulePattern(seq, n, createdAt) {
@@ -827,16 +837,22 @@ function schedulePattern(seq, n, createdAt) {
   T(wait - 1800, () => { drawText("3"); statusEl.textContent = "Get ready..."; });
   T(wait - 1200, () => drawText("2"));
   T(wait - 600,  () => drawText("1"));
-  T(wait, () => { drawText(""); statusEl.textContent = "👀 Watch and listen..."; });
+  T(wait, () => { drawText(""); statusEl.textContent = "👀 Watch the Arduino!"; });
+
+  pdotsEl.innerHTML = "";
+  for (let i = 0; i < seq.length; i++) {
+    const d = document.createElement("div");
+    d.className = "pdot";
+    pdotsEl.appendChild(d);
+  }
 
   const on = stepMs(n);
   for (let i = 0; i < seq.length; i++) {
-    const c = Number(seq[i]);
-    T(wait + i * on * 1.5, () => lightGem(c, on));
+    T(wait + i * on * 1.5, () => pulseDot(i, on));
   }
   T(wait + seq.length * on * 1.5, () => {
     drawText("GO");
-    statusEl.textContent = "🎵 Your turn! Play it back!";
+    statusEl.textContent = `🎵 Your turn! Play back all ${seq.length} ${seq.length === 1 ? "note" : "notes"}!`;
   });
 }
 
@@ -956,7 +972,7 @@ const CODE = [
   { html: '  sequence[length] = <span class="fn">pickNextColor</span>();  <span class="cm">// never the same twice</span>',
     explain: "The Arduino <b>picks a random color</b> that is <b>different from the last one</b>, so the song never repeats the same color twice in a row." },
   { html: '  <span class="fn">sendStatus</span>(<span class="kw">"round:"</span> + length + <span class="kw">":"</span> + song);  <span class="cm">// tell the internet</span>',
-    explain: "This line <b>sends the round number and the whole song</b> through the internet, so this screen can light up the pattern too." },
+    explain: "This line <b>sends the round number and the song</b> through the internet. The screen uses it to count the notes and for the instant replay." },
   { html: '  <span class="fn">flashColor</span>(sequence[s]);   <span class="cm">// show the pattern</span>',
     explain: "The Arduino <b>flashes each color and plays its piano key</b> so players can memorize the pattern." },
   { html: '  <span class="kw">int</span> p = <span class="fn">waitForPress</span>(5000); <span class="cm">// players\' turn</span>',
@@ -1173,7 +1189,7 @@ function showRound(n, seq, createdAt) {
   hideCallout();
   drawText(n);
   statusEl.textContent = "ROUND " + n;
-  subEl.textContent = `Group ${currentGroup} · Watch the lights... then play it back!`;
+  subEl.textContent = `Group ${currentGroup} · Watch the lights on the Arduino, then play them back!`;
   if (n > 1) {
     showToast(pick(CHEERS, "cheer").replace("{n}", n - 1));
     soundCleared();
