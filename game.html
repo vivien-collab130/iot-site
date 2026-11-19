@@ -290,10 +290,24 @@
   /* Stage-light glow: the whole screen softly glows the Arduino's color during the pattern */
   .glow {
     position: fixed; inset: 0; pointer-events: none; z-index: 0;
-    background: radial-gradient(ellipse 75% 65% at 50% 40%, var(--gc, transparent) 0%, transparent 72%);
-    opacity: 0; transition: opacity .12s ease-out;
+    background:
+      radial-gradient(ellipse 70% 60% at 50% 40%, var(--gc, transparent) 0%, var(--gc2, transparent) 45%, transparent 80%);
+    opacity: 0; transition: opacity .08s ease-out;
   }
   .glow.on { opacity: 1; }
+  /* Solid colored frame around the whole screen */
+  .frame {
+    position: fixed; inset: 0; pointer-events: none; z-index: 30;
+    box-shadow: inset 0 0 0 14px var(--gs, transparent), inset 0 0 70px 20px var(--gc2, transparent);
+    opacity: 0; transition: opacity .08s ease-out;
+  }
+  .frame.on { opacity: 1; }
+  /* The pretend board lights up in the same color */
+  .board.lit {
+    border-color: var(--gs);
+    background: linear-gradient(180deg, #162d22, #0c1a14) padding-box, var(--gs) border-box;
+    box-shadow: 0 0 0 4px var(--gs), 0 0 60px var(--gs), 0 0 120px var(--gc2);
+  }
 
   /* Team name bar */
   .namebar { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; align-items: center; margin: 4px auto 14px; max-width: 620px; }
@@ -500,6 +514,7 @@
 <body>
 <div class="heat" id="heat"></div>
 <div class="glow" id="glow"></div>
+<div class="frame" id="frame"></div>
 <div class="toast" id="toast"></div>
 
 <!-- Crown takeover (shows on a new record) -->
@@ -896,20 +911,35 @@ function clearPattern() {
   patternTimers = [];
   pdotsEl.innerHTML = "";
   glowEl.classList.remove("on");
+  frameEl.classList.remove("on");
+  boardEl.classList.remove("lit");
 }
 
 // Pulses one gold dot AND makes the whole screen glow the same color as the Arduino,
 // only while the Arduino is showing the pattern. Nothing lights up during the players' turn.
 const glowEl = document.getElementById("glow");
-const GLOW = ["rgba(240,70,100,.55)", "rgba(60,210,130,.5)", "rgba(80,140,255,.55)"];
+const frameEl = document.getElementById("frame");
+//            bright center              softer edge               solid frame
+const GLOW = [["rgba(255,45,85,.95)",   "rgba(255,45,85,.45)",   "#ff2d55"],   // red
+              ["rgba(30,230,120,.9)",   "rgba(30,230,120,.42)",  "#1ee678"],   // green
+              ["rgba(50,120,255,.95)",  "rgba(50,120,255,.45)",  "#3278ff"]];  // blue
 function pulseDot(i, ms, color) {
   const d = pdotsEl.children[i];
   if (d) d.classList.add("on");
-  glowEl.style.setProperty("--gc", GLOW[color]);
+  const [c1, c2, solid] = GLOW[color];
+  for (const el of [glowEl, frameEl, boardEl]) {
+    el.style.setProperty("--gc", c1);
+    el.style.setProperty("--gc2", c2);
+    el.style.setProperty("--gs", solid);
+  }
   glowEl.classList.add("on");
+  frameEl.classList.add("on");
+  boardEl.classList.add("lit");
   setTimeout(() => {
     if (d) { d.classList.remove("on"); d.classList.add("done"); }
     glowEl.classList.remove("on");
+    frameEl.classList.remove("on");
+    boardEl.classList.remove("lit");
   }, ms);
 }
 
