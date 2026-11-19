@@ -287,6 +287,14 @@
   .howto b { color: var(--gold-bright); }
   .gem.watch { transform: translateY(6px) scale(1.08); box-shadow: 0 2px 0 var(--gem-dark), 0 0 34px var(--gem-light), 0 0 70px var(--gem-light); filter: brightness(1.25); }
 
+  /* Stage-light glow: the whole screen softly glows the Arduino's color during the pattern */
+  .glow {
+    position: fixed; inset: 0; pointer-events: none; z-index: 0;
+    background: radial-gradient(ellipse 75% 65% at 50% 40%, var(--gc, transparent) 0%, transparent 72%);
+    opacity: 0; transition: opacity .12s ease-out;
+  }
+  .glow.on { opacity: 1; }
+
   /* Rhythm dots: show HOW MANY notes, never which colors */
   .pdots { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; min-height: 26px; margin: 2px 0 16px; }
   .pdot { width: 20px; height: 20px; border-radius: 50%; background: rgba(243,220,160,.18); border: 1px solid rgba(243,220,160,.4); transition: transform .12s, background .12s, box-shadow .12s; }
@@ -439,6 +447,7 @@
 </head>
 <body>
 <div class="heat" id="heat"></div>
+<div class="glow" id="glow"></div>
 <div class="toast" id="toast"></div>
 
 <!-- Crown takeover (shows on a new record) -->
@@ -792,7 +801,7 @@ function fireflyBurst(count = 70) {
    VARIETY - never say the same thing twice in a row
    ===================================================================== */
 const CHEERS = ["✨ Round {n} cleared!", "🎶 Nailed it!", "🔥 You are on fire!", "🌟 Beautiful music!",
-                "💫 Perfect harmony!", "🎹 What a performance!", "👏 Keep it going!", "🌲 The forest is cheering!"];
+                "💫 Perfect harmony!", "🎹 What a performance!", "👏 Keep it going!", "🎵 Right on the beat!"];
 const ENCOURAGE = ["That song was tricky! Try again! 🎵", "So close! One note away from more! 😄",
                    "Great music, just one wrong note!", "The next group might not do better! 😉",
                    "Shake it off and play it again! 🎶"];
@@ -815,14 +824,22 @@ function clearPattern() {
   patternTimers.forEach(t => clearTimeout(t));
   patternTimers = [];
   pdotsEl.innerHTML = "";
+  glowEl.classList.remove("on");
 }
 
-// Pulses one plain gold dot. No color and no sound, so the screen never gives away the answer.
-function pulseDot(i, ms) {
+// Pulses one gold dot AND makes the whole screen glow the same color as the Arduino,
+// only while the Arduino is showing the pattern. Nothing lights up during the players' turn.
+const glowEl = document.getElementById("glow");
+const GLOW = ["rgba(240,70,100,.55)", "rgba(60,210,130,.5)", "rgba(80,140,255,.55)"];
+function pulseDot(i, ms, color) {
   const d = pdotsEl.children[i];
-  if (!d) return;
-  d.classList.add("on");
-  setTimeout(() => { d.classList.remove("on"); d.classList.add("done"); }, ms);
+  if (d) d.classList.add("on");
+  glowEl.style.setProperty("--gc", GLOW[color]);
+  glowEl.classList.add("on");
+  setTimeout(() => {
+    if (d) { d.classList.remove("on"); d.classList.add("done"); }
+    glowEl.classList.remove("on");
+  }, ms);
 }
 
 function schedulePattern(seq, n, createdAt) {
@@ -848,7 +865,8 @@ function schedulePattern(seq, n, createdAt) {
 
   const on = stepMs(n);
   for (let i = 0; i < seq.length; i++) {
-    T(wait + i * on * 1.5, () => pulseDot(i, on));
+    const c = Number(seq[i]);
+    T(wait + i * on * 1.5, () => pulseDot(i, on, c));
   }
   T(wait + seq.length * on * 1.5, () => {
     drawText("GO");
