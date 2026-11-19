@@ -295,6 +295,19 @@
   }
   .glow.on { opacity: 1; }
 
+  /* Team name bar */
+  .namebar { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; align-items: center; margin: 4px auto 14px; max-width: 620px; }
+  .namebar.hide { display: none; }
+  .namebar input {
+    flex: 1 1 220px; font-family: var(--font); font-size: 1.1rem; padding: 10px 18px;
+    border-radius: 999px; border: 1px solid var(--gold); background: rgba(8,18,13,.75); color: var(--text); outline: none;
+  }
+  .namebar input::placeholder { color: var(--muted); }
+  .namebar input:focus { box-shadow: 0 0 0 3px rgba(243,220,160,.25); }
+  .nextup { text-align: center; color: var(--gold-bright); font-weight: 800; font-size: 1.2rem; min-height: 1.2em; margin: 0 0 12px; }
+  body.concert .namebar input { font-size: 1.4rem; }
+  body.concert .nextup { font-size: 1.6rem; }
+
   /* Rhythm dots: show HOW MANY notes, never which colors */
   .pdots { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; min-height: 26px; margin: 2px 0 16px; }
   .pdot { width: 20px; height: 20px; border-radius: 50%; background: rgba(243,220,160,.18); border: 1px solid rgba(243,220,160,.4); transition: transform .12s, background .12s, box-shadow .12s; }
@@ -479,6 +492,12 @@
   <div class="status" id="status">Connecting...</div>
   <div class="sub" id="sub"></div>
   <div class="recordline" id="recordline"></div>
+  <div class="namebar" id="namebar">
+    <input id="teamName" maxlength="20" placeholder="New team? Type a name + Enter" autocomplete="off">
+    <button class="pill" id="randomName">🎲 Random</button>
+    <button class="pill" id="setName">✓ Set</button>
+  </div>
+  <div class="nextup" id="nextup"></div>
   <div class="pdots" id="pdots"></div>
 
   <div class="progress" id="progress">
@@ -677,6 +696,7 @@ gems.forEach((gem) => {
   gem.addEventListener("click", () => ringGem(Number(gem.dataset.i)));
 });
 document.addEventListener("keydown", (e) => {
+  if (e.target && e.target.tagName === "INPUT") return;   // typing a team name
   const k = e.key.toUpperCase();
   if (k === "A") ringGem(0);
   if (k === "B") ringGem(1);
@@ -1052,6 +1072,17 @@ let currentGroup = 0;
 let inGame = false;
 let lastGameEnd = 0;
 let forceNewGroup = false;
+let pendingName = "";     // name typed for the NEXT team
+let currentName = "";     // name of the team playing now
+
+const TEAM_NAMES = ["The Harmonizers", "Treble Makers", "The Chord Squad", "Sound Waves", "Beat Keepers",
+                    "The Echoes", "Melody Makers", "Rhythm Rockets", "The Encore", "Note-orious",
+                    "Key Players", "The High Notes", "Tempo Team", "The Golden Chords", "Sharp Shooters"];
+
+function esc(s) {
+  return String(s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+}
+function teamLabel(group, name) { return name ? name : `Group ${group}`; }
 
 function startGameIfNeeded() {
   if (inGame) return;
@@ -1061,6 +1092,9 @@ function startGameIfNeeded() {
     saveNum("pib_group", groupCounter);
     currentGroup = groupCounter;
     forceNewGroup = false;
+    currentName = pendingName;
+    pendingName = "";
+    nextupEl.textContent = "";
   }
   inGame = true;
 }
@@ -1090,24 +1124,45 @@ function renderScores() {
   } else {
     rows.forEach((s) => {
       const li = document.createElement("li");
-      li.innerHTML = `<b>${s.score}</b> rounds · Group ${s.group} ${chipHTML(rankFor(s.score))}`;
+      li.innerHTML = `<b>${s.score}</b> rounds · ${esc(teamLabel(s.group, s.name))} ${chipHTML(rankFor(s.score))}`;
       ol.appendChild(li);
     });
   }
 
   const best = bestEntry();
   document.getElementById("toBeat").textContent = best ? best.score : 0;
-  document.getElementById("toBeatWho").textContent = best ? `(held by Group ${best.group})` : "";
+  document.getElementById("toBeatWho").textContent = best ? `(held by ${teamLabel(best.group, best.name)})` : "";
   recordEl.innerHTML = best
-    ? `👑 Record: <b>${best.score}</b> rounds · Group ${best.group}`
+    ? `👑 Record: <b>${best.score}</b> rounds · ${esc(teamLabel(best.group, best.name))}`
     : `👑 No record yet. Be the first!`;
 }
 
 document.getElementById("nextGroup").onclick = (e) => {
   e.preventDefault();
   forceNewGroup = true;
-  subEl.textContent = `Next game will be Group ${groupCounter + 1}!`;
+  pendingName = "";
+  nextupEl.textContent = `Next up: Group ${groupCounter + 1} 🎵`;
 };
+
+/* =====================================================================
+   TEAM NAMES - type a name + Enter, or tap Random
+   ===================================================================== */
+const namebarEl = document.getElementById("namebar");
+const nextupEl  = document.getElementById("nextup");
+const nameInput = document.getElementById("teamName");
+
+function setTeam(name) {
+  name = String(name || "").trim().slice(0, 20);
+  if (!name) { nameInput.focus(); return; }
+  pendingName = name;
+  forceNewGroup = true;              // the next game is a brand-new team
+  nextupEl.textContent = `Next up: ${name} 🎵`;
+  nameInput.value = "";
+  nameInput.blur();
+}
+nameInput.addEventListener("keydown", (e) => { if (e.key === "Enter") setTeam(nameInput.value); });
+document.getElementById("setName").onclick = () => setTeam(nameInput.value);
+document.getElementById("randomName").onclick = () => setTeam(pick(TEAM_NAMES, "team"));
 
 /* =====================================================================
    SCREENS
@@ -1130,8 +1185,8 @@ function hideCallout() {
   calloutEl.classList.remove("show");
 }
 
-function showCrown(group, score) {
-  document.getElementById("crownGroup").textContent = "GROUP " + group;
+function showCrown(label, score) {
+  document.getElementById("crownGroup").textContent = label.toUpperCase();
   const rank = rankFor(score);
   document.getElementById("crownScore").textContent = `${score} rounds · ${rank.icon} ${rank.name}`;
   crownEl.classList.add("show");
@@ -1148,10 +1203,11 @@ function showWaiting() {
   setHeat(0);
   drawText("GO");
   statusEl.textContent = "Press any button on the Arduino to play!";
+  namebarEl.classList.remove("hide");
   clearPattern();
   const best = bestEntry();
   subEl.textContent = best
-    ? `Record to beat: ${best.score} rounds (Group ${best.group}). Can your group take the crown?`
+    ? `Record to beat: ${best.score} rounds (${teamLabel(best.group, best.name)}). Can your team take the crown?`
     : "No record yet. Be the first group to set one!";
   playCode([[1, 0]]);
 }
@@ -1207,7 +1263,8 @@ function showRound(n, seq, createdAt) {
   hideCallout();
   drawText(n);
   statusEl.textContent = "ROUND " + n;
-  subEl.textContent = `Group ${currentGroup} · Watch the lights on the Arduino, then play them back!`;
+  subEl.textContent = `${teamLabel(currentGroup, currentName)} · Watch the lights on the Arduino, then play them back!`;
+  namebarEl.classList.add("hide");
   if (n > 1) {
     showToast(pick(CHEERS, "cheer").replace("{n}", n - 1));
     soundCleared();
@@ -1230,7 +1287,7 @@ function showGameOver(score, seq, fail, pressed) {
   const isBest = score > 0 && score > prevBest;
 
   const list = loadScores();
-  list.push({ score: score, t: Date.now(), group: currentGroup });
+  list.push({ score: score, t: Date.now(), group: currentGroup, name: currentName });
   saveScores(list);
   renderScores();
 
@@ -1244,13 +1301,14 @@ function showGameOver(score, seq, fail, pressed) {
   setHeat(isBest ? 1 : 0);
 
   statusEl.textContent = "GAME OVER";
-  subEl.innerHTML = `Group ${currentGroup} scored <b>${score}</b> ${score === 1 ? "round" : "rounds"} ${chipHTML(rank)}`;
+  namebarEl.classList.remove("hide");
+  subEl.innerHTML = `${esc(teamLabel(currentGroup, currentName))} scored <b>${score}</b> ${score === 1 ? "round" : "rounds"} ${chipHTML(rank)}`;
 
   const gap = prevBest - score;
   const next = nextRank(score);
   if (isBest) {
     showCallout("👑 NEW RECORD!");
-    showCrown(currentGroup, score);
+    showCrown(teamLabel(currentGroup, currentName), score);
     fireflyBurst();
     setTimeout(() => fireflyBurst(50), 900);
     soundGameOver();
@@ -1362,6 +1420,9 @@ document.getElementById("resetAll").onclick = () => {
   inGame = false;
   lastGameEnd = 0;
   forceNewGroup = false;
+  pendingName = "";
+  currentName = "";
+  nextupEl.textContent = "";
   clearTimeout(crownTimer);
   crownEl.classList.remove("show");
   hideReplay();
