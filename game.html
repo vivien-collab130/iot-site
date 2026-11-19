@@ -443,6 +443,11 @@
   .footer { color: var(--muted); font-size: .9rem; text-align: center; margin-top: 22px; }
   .footer a { color: var(--gold); }
   #problem { color: #f4a3a3; }
+  .sync { margin-top: 10px; }
+  .mini { font-family: var(--font); font-size: .85rem; padding: 4px 12px; border-radius: 999px; cursor: pointer;
+          border: 1px solid var(--line); background: rgba(243,220,160,.06); color: var(--gold-bright); }
+  .mini:hover { background: rgba(243,220,160,.18); }
+  #syncVal { display: inline-block; min-width: 54px; color: var(--text); font-weight: 600; }
   .resetbtn { display: block; margin: 22px auto 0; border-color: var(--rose); color: var(--rose-bright); background: rgba(232,160,180,.08); }
   .resetbtn:hover { background: var(--rose); color: var(--forest-deep); }
 
@@ -667,6 +672,7 @@
     Adafruit IO user: <span id="whoami">?</span> &nbsp;|&nbsp;
     <a href="#" id="changeKey">change key</a> &nbsp;|&nbsp;
     <a href="#" id="nextGroup">next group</a>
+    <div class="sync">Screen timing: <button class="mini" id="syncEarlier">⏪ Earlier</button> <span id="syncVal">0.0 s</span> <button class="mini" id="syncLater">Later ⏩</button></div>
     <div id="problem"></div>
     <button class="pill resetbtn" id="resetAll">↺ Reset all teams</button>
   </div>
@@ -680,7 +686,7 @@ const GAME_FEED         = "game";           // the feed the Arduino sends to
 const POLL_MS           = 2000;             // check every 2 seconds. Keep >= 2000.
 const BACK_TO_GO_MS     = 12000;            // after GAME OVER, go back to GO after this long
 const NEW_GROUP_GAP_MS  = 30000;            // a game starting 30+ seconds after the last one = a new group
-const PATTERN_DELAY_MS  = 2600;             // the Arduino waits this long (round number + 3, 2, 1) before playing the pattern
+const PATTERN_DELAY_MS  = 3550;             // the Arduino waits this long (round number + 3, 2, 1) before playing the pattern
 
 /* ---------- KEY (stays in this browser only, never in this file) ---------- */
 function getKey() {
@@ -903,6 +909,10 @@ function pick(list, key) {
    SHOW THE PATTERN ON THE SCREEN (in time with the Arduino)
    ===================================================================== */
 let patternTimers = [];
+
+// Timing knob: + makes the website flash later, - makes it flash earlier. Saved in this browser.
+let syncNudge = 0;
+try { syncNudge = Number(localStorage.getItem("pib_sync")) || 0; } catch (e) {}
 function stepMs(len) { return len <= 3 ? 650 : Math.max(220, 520 - len * 20); }   // same as the Arduino
 
 const pdotsEl = document.getElementById("pdots");
@@ -947,14 +957,15 @@ function schedulePattern(seq, n, createdAt) {
   clearPattern();
   if (!seq) return;
   const sent = Date.parse(createdAt);
-  let wait = (isNaN(sent) ? Date.now() : sent) + PATTERN_DELAY_MS - Date.now();
-  if (isNaN(wait) || wait < 400) wait = 400;
-  if (wait > 6000) wait = 6000;
+  let wait = (isNaN(sent) ? Date.now() : sent) + PATTERN_DELAY_MS + syncNudge - Date.now();
+  if (isNaN(wait)) wait = 400;
+  if (wait > 8000) wait = 8000;
 
-  const T = (ms, fn) => patternTimers.push(setTimeout(fn, Math.max(0, ms)));
-  T(wait - 1800, () => { drawText("3"); statusEl.textContent = "Get ready..."; });
-  T(wait - 1200, () => drawText("2"));
-  T(wait - 600,  () => drawText("1"));
+  // Anything whose time has already passed is skipped, so a late message still lines up.
+  const T = (ms, fn) => { if (ms >= -50) patternTimers.push(setTimeout(fn, Math.max(0, ms))); };
+  T(wait - 2550, () => { drawText("3"); statusEl.textContent = "Get ready..."; });
+  T(wait - 1700, () => drawText("2"));
+  T(wait - 850,  () => drawText("1"));
   T(wait, () => { drawText(""); statusEl.textContent = "👀 Watch the Arduino!"; });
 
   pdotsEl.innerHTML = "";
@@ -967,12 +978,14 @@ function schedulePattern(seq, n, createdAt) {
   const on = stepMs(n);
   for (let i = 0; i < seq.length; i++) {
     const c = Number(seq[i]);
-    T(wait + i * on * 1.5, () => pulseDot(i, on, c));
+    const at = wait + i * on * 1.5;
+    if (at < -50 && pdotsEl.children[i]) pdotsEl.children[i].classList.add("done");   // already passed
+    T(at, () => pulseDot(i, on, c));
   }
-  T(wait + seq.length * on * 1.5, () => {
+  patternTimers.push(setTimeout(() => {
     drawText("GO");
     statusEl.textContent = `🎵 Your turn! Play back all ${seq.length} ${seq.length === 1 ? "note" : "notes"}!`;
-  });
+  }, Math.max(0, wait + seq.length * on * 1.5)));
 }
 
 /* =====================================================================
@@ -1354,7 +1367,7 @@ function showRound(n, seq, createdAt) {
   }
   updateProgress(n);
   schedulePattern(seq, n, createdAt);
-  playCode([[6, 0], [7, 900], [8, 2600], [9, 2600 + n * stepMs(n) * 1.5]]);
+  playCode([[6, 0], [7, 900], [8, 3550], [9, 3550 + n * stepMs(n) * 1.5]]);
 }
 
 function showGameOver(score, seq, fail, pressed) {
@@ -1488,6 +1501,23 @@ function handleMessage(value, firstLoad, createdAt) {
     logMessage(value, "A message the game doesn't use.");
   }
 }
+
+/* =====================================================================
+   TIMING KNOB - nudge the screen earlier or later by 0.1 seconds
+   ===================================================================== */
+const syncValEl = document.getElementById("syncVal");
+function showSync() {
+  const s = syncNudge / 1000;
+  syncValEl.textContent = (s > 0 ? "+" : "") + s.toFixed(1) + " s";
+}
+function nudge(ms) {
+  syncNudge = Math.max(-2000, Math.min(2000, syncNudge + ms));
+  try { localStorage.setItem("pib_sync", String(syncNudge)); } catch (e) {}
+  showSync();
+}
+document.getElementById("syncEarlier").onclick = () => nudge(-100);
+document.getElementById("syncLater").onclick = () => nudge(100);
+showSync();
 
 /* =====================================================================
    RESET ALL TEAMS - back to as if nobody has ever played
