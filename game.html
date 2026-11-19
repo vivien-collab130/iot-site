@@ -956,8 +956,18 @@ function pulseDot(i, ms, color) {
 function schedulePattern(seq, n, createdAt) {
   clearPattern();
   if (!seq) return;
-  const sent = Date.parse(createdAt);
-  let wait = (isNaN(sent) ? Date.now() : sent) + PATTERN_DELAY_MS + syncNudge - Date.now();
+  // Best guess of when the Arduino really sent the message.
+  // Adafruit IO only gives whole seconds, and this page checks every 2 seconds,
+  // so we combine both clues and take the middle of what's possible.
+  const now = Date.now();
+  const created = Date.parse(createdAt);
+  let sentAt = now - 1000;
+  if (!isNaN(created)) {
+    const lo = Math.max(created, now - POLL_MS - 400);   // can't be before the whole second, or before our last check
+    const hi = Math.min(created + 1000, now);            // can't be after the next second, or after now
+    sentAt = lo <= hi ? (lo + hi) / 2 : created + 500;
+  }
+  let wait = sentAt + PATTERN_DELAY_MS + syncNudge - now;
   if (isNaN(wait)) wait = 400;
   if (wait > 8000) wait = 8000;
 
