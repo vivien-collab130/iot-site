@@ -280,6 +280,13 @@
   .role.b .rname { color: #6299f0; }
   .roletip { text-align: center; color: var(--muted); font-size: .98rem; margin: 16px 0 0; }
 
+  /* The stage pads (light up with the pattern) */
+  .stage { margin: 4px auto 10px; text-align: center; }
+  .stage .keyrow { margin-bottom: 12px; }
+  .howto { color: var(--muted); font-size: 1.05rem; margin: 6px 0 18px; }
+  .howto b { color: var(--gold-bright); }
+  .gem.watch { transform: translateY(6px) scale(1.08); box-shadow: 0 2px 0 var(--gem-dark), 0 0 34px var(--gem-light), 0 0 70px var(--gem-light); filter: brightness(1.25); }
+
   /* Button key */
   .keyrow { display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; }
   .gem {
@@ -416,6 +423,10 @@
   body.concert .callout { font-size: clamp(1.6rem, 4vw, 2.4rem); }
   body.concert .note { width: 64px; height: 64px; font-size: 1.2rem; }
   body.concert .verdict { font-size: 1.7rem; }
+  body.concert .gem { width: 190px; padding: 20px 10px; }
+  body.concert .gem .letter { font-size: 3.2rem; }
+  body.concert .gem .label { font-size: 1.4rem; }
+  body.concert .howto { font-size: 1.4rem; }
   body.concert .blame { font-size: 1.4rem; }
 </style>
 </head>
@@ -459,32 +470,8 @@
   </div>
   <div class="callout" id="callout"></div>
 
-  <!-- Instant replay (appears after GAME OVER) -->
-  <div class="card replay concert-keep" id="replay">
-    <h2>🎬 INSTANT REPLAY</h2>
-    <p class="verdict" id="verdict"></p>
-    <p class="blame" id="blame"></p>
-    <div class="notes" id="notes"></div>
-    <div class="center"><button class="pill" id="replayBtn">▶ Replay the song</button></div>
-  </div>
-
-  <!-- Roles -->
-  <div class="card">
-    <h2>🎼 PLAY AS A BAND</h2>
-    <p class="what">Pick your roles before you start. Only the Pianist touches the buttons. <b>Everyone else calls out their color!</b></p>
-    <div class="roles">
-      <div class="role p"><div class="icon">🎹</div><div class="rname">The Pianist</div><div class="rjob">Listens to the band and presses the buttons</div></div>
-      <div class="role r"><div class="icon">🔴</div><div class="rname">Red Caller</div><div class="rjob">Shouts "RED!" for every red</div></div>
-      <div class="role g"><div class="icon">🟢</div><div class="rname">Green Caller</div><div class="rjob">Shouts "GREEN!" for every green</div></div>
-      <div class="role b"><div class="icon">🔵</div><div class="rname">Blue Caller</div><div class="rjob">Shouts "BLUE!" for every blue</div></div>
-    </div>
-    <p class="roletip">Extra people? Become Memory Coaches and help the band remember the song. Swap the Pianist each game!</p>
-  </div>
-
-  <!-- Button key -->
-  <div class="card">
-    <h2>THE BUTTON KEY</h2>
-    <p class="what">Each button is a piano key. Together, C, G and E make a happy chord, so every pattern sounds like a little song. <b>Tap one to hear it!</b></p>
+  <!-- The stage: these light up with the pattern. Tap one to hear it. -->
+  <div class="stage">
     <div class="keyrow">
       <button class="gem red" data-i="0">
         <span class="shape">▼</span><span class="letter">A</span><span class="label">Red</span><span class="note2">low · piano key C</span>
@@ -496,12 +483,22 @@
         <span class="shape">▲</span><span class="letter">C</span><span class="label">Blue</span><span class="note2">high · piano key E</span>
       </button>
     </div>
+    <p class="howto">🎵 <b>How to play together:</b> one person presses the buttons on the Arduino. Everyone else helps by calling out the colors!</p>
+  </div>
+
+  <!-- Instant replay (appears after GAME OVER) -->
+  <div class="card replay concert-keep" id="replay">
+    <h2>🎬 INSTANT REPLAY</h2>
+    <p class="verdict" id="verdict"></p>
+    <p class="blame" id="blame"></p>
+    <div class="notes" id="notes"></div>
+    <div class="center"><button class="pill" id="replayBtn">▶ Replay the song</button></div>
   </div>
 
   <!-- Leaderboard -->
   <div class="card concert-keep" id="leaderCard">
     <h2>TOP GROUPS</h2>
-    <p class="what">Every score here came from the Arduino, through the internet. <b>Can your band take the crown?</b></p>
+    <p class="what">Every score here came from the Arduino, through the internet. <b>Can your group take the crown?</b></p>
     <div class="beat">Record to beat: <b id="toBeat">0</b> <span class="who" id="toBeatWho"></span></div>
     <ol class="scores" id="scores"></ol>
     <div class="ladder" id="ladder"></div>
@@ -581,6 +578,7 @@ const GAME_FEED         = "game";           // the feed the Arduino sends to
 const POLL_MS           = 2000;             // check every 2 seconds. Keep >= 2000.
 const BACK_TO_GO_MS     = 12000;            // after GAME OVER, go back to GO after this long
 const NEW_GROUP_GAP_MS  = 30000;            // a game starting 30+ seconds after the last one = a new group
+const PATTERN_DELAY_MS  = 2600;             // the Arduino waits this long (round number + 3, 2, 1) before playing the pattern
 
 /* ---------- KEY (stays in this browser only, never in this file) ---------- */
 function getKey() {
@@ -783,6 +781,66 @@ function fireflyBurst(count = 70) {
 }
 
 /* =====================================================================
+   VARIETY - never say the same thing twice in a row
+   ===================================================================== */
+const CHEERS = ["✨ Round {n} cleared!", "🎶 Nailed it!", "🔥 You are on fire!", "🌟 Beautiful music!",
+                "💫 Perfect harmony!", "🎹 What a performance!", "👏 Keep it going!", "🌲 The forest is cheering!"];
+const ENCOURAGE = ["That song was tricky! Try again! 🎵", "So close! One note away from more! 😄",
+                   "Great music, just one wrong note!", "The next group might not do better! 😉",
+                   "Shake it off and play it again! 🎶"];
+const lastPick = {};
+function pick(list, key) {
+  let i;
+  do { i = Math.floor(Math.random() * list.length); } while (list.length > 1 && i === lastPick[key]);
+  lastPick[key] = i;
+  return list[i];
+}
+
+/* =====================================================================
+   SHOW THE PATTERN ON THE SCREEN (in time with the Arduino)
+   ===================================================================== */
+let patternTimers = [];
+function stepMs(len) { return len <= 3 ? 650 : Math.max(220, 520 - len * 20); }   // same as the Arduino
+
+function clearPattern() {
+  patternTimers.forEach(t => clearTimeout(t));
+  patternTimers = [];
+  gems.forEach(g => g.classList.remove("watch"));
+}
+
+function lightGem(i, ms) {
+  const g = gems[i];
+  g.classList.add("watch");
+  playTone(NOTES[i], ms, "triangle", 0.12);
+  setTimeout(() => g.classList.remove("watch"), ms);
+}
+
+function schedulePattern(seq, n, createdAt) {
+  clearPattern();
+  if (!seq) return;
+  const sent = Date.parse(createdAt);
+  let wait = (isNaN(sent) ? Date.now() : sent) + PATTERN_DELAY_MS - Date.now();
+  if (isNaN(wait) || wait < 400) wait = 400;
+  if (wait > 6000) wait = 6000;
+
+  const T = (ms, fn) => patternTimers.push(setTimeout(fn, Math.max(0, ms)));
+  T(wait - 1800, () => { drawText("3"); statusEl.textContent = "Get ready..."; });
+  T(wait - 1200, () => drawText("2"));
+  T(wait - 600,  () => drawText("1"));
+  T(wait, () => { drawText(""); statusEl.textContent = "👀 Watch and listen..."; });
+
+  const on = stepMs(n);
+  for (let i = 0; i < seq.length; i++) {
+    const c = Number(seq[i]);
+    T(wait + i * on * 1.5, () => lightGem(c, on));
+  }
+  T(wait + seq.length * on * 1.5, () => {
+    drawText("GO");
+    statusEl.textContent = "🎵 Your turn! Play it back!";
+  });
+}
+
+/* =====================================================================
    INSTANT REPLAY - replays the song and shows the wrong note
    ===================================================================== */
 const replayEl  = document.getElementById("replay");
@@ -808,9 +866,9 @@ function showReplay(seq, fail, pressed) {
     verdictEl.innerHTML = `${CEMOJI[want]} Too slow! Note ${fail + 1} needed <b>${CNAME[want]}</b>.`;
   } else {
     const got = Number(pressed);
-    verdictEl.innerHTML = `${CEMOJI[want]} Note ${fail + 1} needed <b>${CNAME[want]}</b>, but the Pianist pressed ${CEMOJI[got]} <b>${CNAME[got]}</b>.`;
+    verdictEl.innerHTML = `${CEMOJI[want]} Note ${fail + 1} needed <b>${CNAME[want]}</b>, but ${CEMOJI[got]} <b>${CNAME[got]}</b> was pressed.`;
   }
-  blameEl.textContent = `${CNICE[want]} Caller, that was your cue! 😄`;
+  blameEl.textContent = pick(ENCOURAGE, "enc");
 
   notesEl.innerHTML = "";
   for (let i = 0; i < seq.length; i++) {
@@ -895,20 +953,20 @@ const CODE = [
   { html: '', explain: "" },
   { html: '<span class="kw">void</span> <span class="fn">playGame</span>() {',
     explain: "<b>playGame()</b> is a function: a named set of steps the Arduino can run whenever it needs to." },
-  { html: '  sequence[length] = <span class="fn">random</span>(3);  <span class="cm">// pick a color</span>',
-    explain: "The Arduino <b>picks a random color</b> (0 = red, 1 = green, 2 = blue) and adds it to the pattern." },
-  { html: '  <span class="fn">sendStatus</span>(<span class="kw">"round:"</span> + length);  <span class="cm">// tell the internet</span>',
-    explain: "This line <b>sends the round number through the internet</b> to this screen." },
+  { html: '  sequence[length] = <span class="fn">pickNextColor</span>();  <span class="cm">// never the same twice</span>',
+    explain: "The Arduino <b>picks a random color</b> that is <b>different from the last one</b>, so the song never repeats the same color twice in a row." },
+  { html: '  <span class="fn">sendStatus</span>(<span class="kw">"round:"</span> + length + <span class="kw">":"</span> + song);  <span class="cm">// tell the internet</span>',
+    explain: "This line <b>sends the round number and the whole song</b> through the internet, so this screen can light up the pattern too." },
   { html: '  <span class="fn">flashColor</span>(sequence[s]);   <span class="cm">// show the pattern</span>',
     explain: "The Arduino <b>flashes each color and plays its piano key</b> so players can memorize the pattern." },
   { html: '  <span class="kw">int</span> p = <span class="fn">waitForPress</span>(5000); <span class="cm">// players\' turn</span>',
-    explain: "Now it's the <b>band's turn</b>. The Arduino waits up to 5 seconds for each button press." },
+    explain: "Now it's the <b>players' turn</b>. The Arduino waits up to 5 seconds for each button press." },
   { html: '  <span class="kw">if</span> (p != sequence[s]) <span class="fn">gameOver</span>(score, s, p);',
-    explain: "An <b>if statement</b> checks: did the Pianist press the right button? If not, it's game over!" },
+    explain: "An <b>if statement</b> checks: was the right button pressed? If not, it's game over!" },
   { html: '}', explain: "" },
   { html: '', explain: "" },
   { html: '<span class="kw">void</span> <span class="fn">gameOver</span>(<span class="kw">int</span> score, <span class="kw">int</span> fail, <span class="kw">int</span> pressed) {',
-    explain: "<b>gameOver()</b> runs when the band makes a mistake. It gets the <b>score</b>, <b>which note</b> was wrong, and <b>what was pressed</b>." },
+    explain: "<b>gameOver()</b> runs when someone makes a mistake. It gets the <b>score</b>, <b>which note</b> was wrong, and <b>what was pressed</b>." },
   { html: '  <span class="fn">sendStatus</span>(<span class="kw">"over:"</span> + score + <span class="kw">":"</span> + song);  <span class="cm">// for the replay</span>',
     explain: "This line sends the <b>score and the whole song</b> through the internet, so this screen can show the instant replay." },
   { html: '}', explain: "" }
@@ -994,7 +1052,7 @@ function renderScores() {
   const ol = document.getElementById("scores");
   ol.innerHTML = "";
   if (rows.length === 0) {
-    ol.innerHTML = '<li class="empty">No games yet. Be the first band to set the record!</li>';
+    ol.innerHTML = '<li class="empty">No games yet. Be the first group to set the record!</li>';
   } else {
     rows.forEach((s) => {
       const li = document.createElement("li");
@@ -1055,11 +1113,12 @@ function showWaiting() {
   hideCallout();
   setHeat(0);
   drawText("GO");
-  statusEl.textContent = "Pick your Pianist, then press any button!";
+  statusEl.textContent = "Press any button on the Arduino to play!";
+  clearPattern();
   const best = bestEntry();
   subEl.textContent = best
-    ? `Record to beat: ${best.score} rounds (Group ${best.group}). Can your band take the crown?`
-    : "No record yet. Be the first band to set one!";
+    ? `Record to beat: ${best.score} rounds (Group ${best.group}). Can your group take the crown?`
+    : "No record yet. Be the first group to set one!";
   playCode([[1, 0]]);
 }
 
@@ -1104,7 +1163,7 @@ function updateProgress(n) {
   setHeat(heat);
 }
 
-function showRound(n) {
+function showRound(n, seq, createdAt) {
   clearTimeout(backTimer);
   if (n === 1 && inGame) inGame = false;
   startGameIfNeeded();
@@ -1116,17 +1175,19 @@ function showRound(n) {
   statusEl.textContent = "ROUND " + n;
   subEl.textContent = `Group ${currentGroup} · Watch the lights... then play it back!`;
   if (n > 1) {
-    showToast(`✨ Round ${n - 1} cleared!`);
+    showToast(pick(CHEERS, "cheer").replace("{n}", n - 1));
     soundCleared();
   } else {
     soundRound();
   }
   updateProgress(n);
-  playCode([[6, 0], [7, 900], [8, 1900], [9, 3600]]);
+  schedulePattern(seq, n, createdAt);
+  playCode([[6, 0], [7, 900], [8, 2600], [9, 2600 + n * stepMs(n) * 1.5]]);
 }
 
 function showGameOver(score, seq, fail, pressed) {
   clearTimeout(backTimer);
+  clearPattern();
   startGameIfNeeded();
   inGame = false;
   lastGameEnd = Date.now();
@@ -1184,7 +1245,7 @@ function showGameOver(score, seq, fail, pressed) {
 
 /* =====================================================================
    3. CHECK THE MAILBOX (polling) every POLL_MS
-   Messages look like:  "round:3"   or   "over:7:01201020:4:1"
+   Messages look like:  "round:3:021"   or   "over:7:01201020:4:1"
    (over : score : the song : which note was wrong : what was pressed)
    ===================================================================== */
 let lastSeenId = null;
@@ -1215,7 +1276,7 @@ async function checkGame() {
     if (data.id !== lastSeenId) {
       const firstLoad = (lastSeenId === null);
       lastSeenId = data.id;
-      handleMessage(String(data.value), firstLoad);
+      handleMessage(String(data.value), firstLoad, data.created_at);
     } else {
       mailIcon.textContent = "📪";
       mailNews.textContent = "Nothing new.";
@@ -1225,7 +1286,7 @@ async function checkGame() {
   }
 }
 
-function handleMessage(value, firstLoad) {
+function handleMessage(value, firstLoad, createdAt) {
   if (firstLoad) {               // don't replay an old game when the page opens
     mailIcon.textContent = "📪";
     mailNews.textContent = "";
@@ -1237,9 +1298,11 @@ function handleMessage(value, firstLoad) {
   mailNews.innerHTML = '<span class="newmail">New mail!</span>';
 
   if (value.startsWith("round:")) {
-    const n = parseInt(value.slice(6)) || 0;
-    logMessage(value, `Round ${n} started. The Arduino is showing the pattern.`);
-    showRound(n);
+    const parts = value.split(":");
+    const n = parseInt(parts[1]) || 0;
+    const seq = parts[2] || "";
+    logMessage(value, `Round ${n} started. The song is now ${n} ${n === 1 ? "note" : "notes"} long.`);
+    showRound(n, seq, createdAt);
   } else if (value.startsWith("over:")) {
     const parts = value.split(":");
     const n = parseInt(parts[1]) || 0;
@@ -1268,6 +1331,7 @@ document.getElementById("resetAll").onclick = () => {
   clearTimeout(crownTimer);
   crownEl.classList.remove("show");
   hideReplay();
+  clearPattern();
   serialEl.innerHTML = '<div class="empty">Waiting for the first message...</div>';
   serialStarted = false;
   renderScores();
